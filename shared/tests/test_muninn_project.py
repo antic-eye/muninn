@@ -8,7 +8,12 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from muninn_project import detect_project_name, sanitise_collection_name
+from muninn_project import (
+    detect_project_name,
+    sanitise_collection_name,
+    GLOBAL_PROJECT_NAME,
+    GLOBAL_COLLECTION_NAME,
+)
 
 
 class TestDetectProjectName:
@@ -88,7 +93,8 @@ class TestSanitiseCollectionName:
 
 
 def test_global_constants_exist():
-    import muninn_project as mp
-
-    assert mp.GLOBAL_PROJECT_NAME == "__global__"
-    assert mp.GLOBAL_COLLECTION_NAME == "muninn___global__"
+    assert GLOBAL_PROJECT_NAME == "__global__"
+    assert GLOBAL_COLLECTION_NAME == "muninn___global"
+    assert GLOBAL_COLLECTION_NAME == sanitise_collection_name(GLOBAL_PROJECT_NAME), (
+        "GLOBAL_COLLECTION_NAME must match what sanitise_collection_name produces"
+    )

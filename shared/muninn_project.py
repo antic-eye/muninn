@@ -1,10 +1,14 @@
 """
-muninn_project.py — Project name detection for Muninn.
+muninn_project.py — Project name detection and global-memory constants for Muninn.
 
 Priority:
   1. MUNINN_PROJECT env var (explicit override)
   2. git rev-parse --show-toplevel  → basename
   3. os.getcwd() → basename
+
+Constants:
+  GLOBAL_PROJECT_NAME     — canonical name for the cross-project (global) memory scope
+  GLOBAL_COLLECTION_NAME  — ChromaDB collection name for that scope
 """
 
 import os
@@ -64,4 +68,6 @@ def sanitise_collection_name(project_name: str) -> str:
 # ---------------------------------------------------------------------------
 
 GLOBAL_PROJECT_NAME = "__global__"
-GLOBAL_COLLECTION_NAME = "muninn___global__"
+GLOBAL_COLLECTION_NAME = sanitise_collection_name(
+    GLOBAL_PROJECT_NAME
+)  # → 'muninn___global'
