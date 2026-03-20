@@ -74,3 +74,35 @@ class TestDeleteMemory:
         col = get_collection(chroma_client, "muninn_test")
         with pytest.raises(MemoryNotFoundError):
             delete_memory(col, "does-not-exist")
+
+
+class TestListMemories:
+    def test_list_returns_all_entries(self, chroma_client):
+        from muninn_chroma import upsert_memory, list_memories, get_collection
+
+        col = get_collection(chroma_client, "muninn_list_test")
+        for i in range(3):
+            upsert_memory(
+                col,
+                str(uuid.uuid4()),
+                f"doc {i}",
+                [float(i) / 10] * 1024,
+                {"seq": str(i)},
+            )
+        results = list_memories(col, limit=10, offset=0)
+        assert len(results) == 3
+        assert all("id" in r and "document" in r and "metadata" in r for r in results)
+
+
+class TestWipeCollection:
+    def test_wipe_returns_count_and_empties_collection(self, chroma_client):
+        from muninn_chroma import upsert_memory, wipe_collection, get_collection
+
+        col = get_collection(chroma_client, "muninn_wipe_test")
+        for i in range(3):
+            upsert_memory(
+                col, str(uuid.uuid4()), f"doc {i}", [float(i) / 10] * 1024, {"k": "v"}
+            )
+        deleted = wipe_collection(chroma_client, "muninn_wipe_test")
+        assert deleted == 3
+        assert col.count() == 0

@@ -67,6 +67,8 @@ def query_memory(
     Semantic search. Returns a list of result dicts with keys:
     id, document, metadata, distance.
     """
+    if top_k <= 0:
+        raise ValueError(f"top_k must be positive, got {top_k}")
     count = collection.count()
     if count == 0:
         return []
