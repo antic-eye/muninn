@@ -1,0 +1,83 @@
+---
+name: memory-write
+description: "Use when saving project context, decisions, or session summaries to Muninn — at context compaction, PR creation, session end, or on demand when the user says 'remember this'"
+---
+
+# Muninn — Memory Write
+
+## Overview
+
+Write structured memory entries to the current project's vector store.
+Uses the `memory_write` MCP tool.
+
+## Prerequisites
+
+Verify the MCP server is responding:
+```bash
+# Check that muninn MCP tools are available — if not, see README for setup
+```
+
+## When to Write
+
+| Trigger | Action |
+|---------|--------|
+| Context window > 80% | Write `summary` + `next-steps` |
+| PR created or merged | Write `summary` of what was built |
+| Session ends (user says "done", "bye", "wrap up") | Write `summary` + `next-steps` |
+| User says "remember this" / "save this" | Write `note` with the stated content |
+| Architectural/design decision made | Write `decision` |
+| New code pattern established | Write `code-pattern` |
+
+## Memory Types
+
+| Type | When to use | What to include |
+|------|------------|-----------------|
+| `summary` | End of work block | Files changed, features built, bugs fixed |
+| `decision` | When a trade-off is resolved | What was decided, why, alternatives rejected |
+| `next-steps` | When stopping mid-task | Exact next action, current state, blockers |
+| `code-pattern` | When convention is established | Pattern name, example, where it applies |
+| `note` | Everything else | Verbatim or summarised content |
+
+## Writing a Memory
+
+```
+memory_write(
+  text="<clear, self-contained text>",
+  memory_type="<type from table above>",
+  tags="<comma-separated keywords>"
+)
+```
+
+### Good text examples
+
+**summary:**
+```
+Built the ChromaDB helper module (muninn_chroma.py). Functions: get_collection,
+upsert_memory, query_memory, list_memories, delete_memory, wipe_collection.
+All 6 unit tests passing. Branch: feat/muninn-chroma-module.
+```
+
+**decision:**
+```
+Decided to use ChromaDB embedded mode (not HTTP server) because it requires zero
+infrastructure and data lives at ~/.config/opencode/muninn/chroma/. Rejected
+docker-based ChromaDB to avoid daemon dependency.
+```
+
+**next-steps:**
+```
+Next: implement muninn.py MCP server (Task 4). muninn_chroma.py done,
+muninn_embed.py done, muninn_project.py done. Start with FastMCP registration,
+then wire handler functions.
+```
+
+## Tags to Always Include
+
+- Jira ticket keys if work is tracked (e.g. `PEAI-123`)
+- Files changed (e.g. `muninn_chroma,muninn_embed`)
+- Feature area (e.g. `auth,refactor,testing`)
+
+## After Writing
+
+Confirm to the user:
+> "Memory saved ✓ (type: {type}, id: {id[:8]}…)"
