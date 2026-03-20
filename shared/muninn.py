@@ -89,7 +89,10 @@ def handle_memory_delete(entry_id: str) -> dict[str, Any]:
     collection_name = mp.sanitise_collection_name(project)
     client = mc.get_client()
     col = mc.get_collection(client, collection_name)
-    mc.delete_memory(col, entry_id)
+    try:
+        mc.delete_memory(col, entry_id)
+    except mc.MemoryNotFoundError:
+        return {"deleted": False, "id": entry_id, "error": "not found"}
     return {"deleted": True, "id": entry_id}
 
 

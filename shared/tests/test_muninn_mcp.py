@@ -93,3 +93,36 @@ class TestToolHandlers:
         handle_memory_write(text="proj-a memory", memory_type="note", tags="")
         projects = handle_memory_list_projects()
         assert any("proj-a" in p for p in projects)
+
+    def test_handle_memory_wipe_project_requires_confirm(
+        self, fake_client, fake_embedding, monkeypatch
+    ):
+        from muninn import handle_memory_wipe_project
+
+        with pytest.raises(ValueError, match="confirm=True"):
+            handle_memory_wipe_project("test-project", confirm=False)
+
+    def test_handle_memory_wipe_project_with_confirm(
+        self, fake_client, fake_embedding, monkeypatch
+    ):
+        import muninn_project as mp
+
+        monkeypatch.setattr(mp, "detect_project_name", lambda: "test-project")
+        from muninn import handle_memory_write, handle_memory_wipe_project
+
+        handle_memory_write(text="to be wiped", memory_type="note", tags="")
+        result = handle_memory_wipe_project("test-project", confirm=True)
+        assert result["wiped"] is True
+        assert result["entries_deleted"] >= 1
+
+    def test_handle_memory_delete_not_found(
+        self, fake_client, fake_embedding, monkeypatch
+    ):
+        import muninn_project as mp
+
+        monkeypatch.setattr(mp, "detect_project_name", lambda: "test-project")
+        from muninn import handle_memory_delete
+
+        result = handle_memory_delete(entry_id="nonexistent-id")
+        assert result["deleted"] is False
+        assert result["error"] == "not found"
