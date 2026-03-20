@@ -28,7 +28,10 @@ def detect_project_name() -> str:
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
 
-    return Path(os.getcwd()).name
+    name = Path(os.getcwd()).name
+    if not name or name == ".":
+        raise RuntimeError("Could not determine a valid project name from any source")
+    return name
 
 
 def sanitise_collection_name(project_name: str) -> str:
@@ -37,7 +40,16 @@ def sanitise_collection_name(project_name: str) -> str:
 
     ChromaDB rules: 3-63 chars, alphanumeric + hyphens/underscores,
     must start/end with alphanumeric.
+
+    Raises ValueError if project_name is empty.
     """
+    if not project_name or not project_name.strip():
+        raise ValueError("project_name must not be empty")
     safe = re.sub(r"[^a-zA-Z0-9_-]", "_", project_name)
     prefixed = f"muninn_{safe}"
-    return prefixed[:63]
+    truncated = prefixed[:63].rstrip("_-")
+    if len(truncated) < 3:
+        raise ValueError(
+            f"Sanitised collection name too short after cleaning: {truncated!r}"
+        )
+    return truncated
