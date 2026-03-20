@@ -7,8 +7,8 @@ description: "Use at the start of every development session to load project cont
 
 ## Overview
 
-Load project context at session start. Queries the current project's vector store
-and synthesises a session brief.
+Load project context at session start. Queries both the current project's vector store
+and the global (cross-project) vector store, then synthesises a combined session brief.
 
 ## When to Use
 
@@ -26,26 +26,28 @@ git rev-parse --show-toplevel 2>/dev/null || pwd
 
 Note the project name (basename of the result). This is what Muninn uses automatically.
 
-### Step 2: Broad semantic search
+### Step 2a: Search global memory
+
+```
+global_memory_search(query="recent patterns workflows infra tools procedures", top_k=5)
+global_memory_list(limit=3)
+```
+
+### Step 2b: Search project memory
 
 ```
 memory_search(query="recent work context decisions next steps", top_k=5)
-```
-
-### Step 3: Fetch most recent entries
-
-```
 memory_list(limit=5, offset=0)
 ```
 
-### Step 4: Synthesise a session brief
+### Step 3: Synthesise a session brief
 
 Combine the results into a **Session Brief** with these sections:
 
 ```
 ## Session Brief — <project-name>
 
-**Last worked on:** <date of most recent memory>
+**Last worked on:** <date of most recent project memory>
 
 **Recent summary:** <2-3 sentences from summary memories>
 
@@ -57,11 +59,16 @@ Combine the results into a **Session Brief** with these sections:
 - <decision 1 with rationale>
 
 **Active branch:** <from git_branch metadata if present>
+
+**Global context (cross-project):**
+- <relevant global patterns or procedures, if any>
 ```
+
+If there are no global memories, omit the "Global context" section entirely.
 
 Present the brief to the user *before* asking what to work on.
 
-### Step 5: No memories found
+### Step 4: No memories found
 
 If both calls return empty results, say:
 > "No prior memories found for project **{project}**. This appears to be a fresh start.
@@ -75,3 +82,4 @@ If both calls return empty results, say:
 | Find open work | `"next steps todo blockers"` |
 | Find a code pattern | `"pattern convention <area>"` |
 | Find recent summaries | `memory_list(limit=5)` (no search needed) |
+| Find infra/tool procedures | `global_memory_search("openshift vpn login cli")` |
