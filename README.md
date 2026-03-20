@@ -1,5 +1,7 @@
 # Muninn
 
+<img src="logo.svg" alt="Muninn logo" width="120" align="right" />
+
 > *Muninn (Old Norse: "memory") is one of Odin's two ravens — the raven of memory.*
 
 Muninn is a per-project semantic memory layer for OpenCode. It gives AI coding sessions persistent, searchable memory — so you never have to re-explain your project from scratch.
