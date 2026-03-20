@@ -118,6 +118,75 @@ def handle_memory_list_projects() -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# Global memory handlers
+# ---------------------------------------------------------------------------
+
+
+def handle_global_memory_write(
+    text: str,
+    memory_type: str,
+    tags: str,
+    source: str = "manual",
+) -> dict[str, Any]:
+    collection_name = mp.GLOBAL_COLLECTION_NAME
+    client = mc.get_client()
+    col = mc.get_collection(client, collection_name)
+
+    entry_id = str(uuid.uuid4())
+    embedding = me.get_embedding(text)
+
+    metadata = {
+        "project": mp.GLOBAL_PROJECT_NAME,
+        "type": memory_type,
+        "session_date": datetime.date.today().isoformat(),
+        "tags": tags,
+        "source": source,
+    }
+
+    mc.upsert_memory(col, entry_id, text, embedding, metadata)
+    return {"id": entry_id, "project": mp.GLOBAL_PROJECT_NAME, "type": memory_type}
+
+
+def handle_global_memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
+    collection_name = mp.GLOBAL_COLLECTION_NAME
+    client = mc.get_client()
+    col = mc.get_collection(client, collection_name)
+    query_embedding = me.get_embedding(query)
+    return mc.query_memory(col, query_embedding, top_k=top_k)
+
+
+def handle_global_memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
+    collection_name = mp.GLOBAL_COLLECTION_NAME
+    client = mc.get_client()
+    col = mc.get_collection(client, collection_name)
+    return mc.list_memories(col, limit=limit, offset=offset)
+
+
+def handle_global_memory_delete(entry_id: str) -> dict[str, Any]:
+    collection_name = mp.GLOBAL_COLLECTION_NAME
+    client = mc.get_client()
+    col = mc.get_collection(client, collection_name)
+    try:
+        mc.delete_memory(col, entry_id)
+    except mc.MemoryNotFoundError:
+        return {"deleted": False, "id": entry_id, "error": "not found"}
+    return {"deleted": True, "id": entry_id}
+
+
+def handle_global_memory_wipe(confirm: bool = False) -> dict[str, Any]:
+    if not confirm:
+        raise ValueError("Set confirm=True to wipe all global memories.")
+    collection_name = mp.GLOBAL_COLLECTION_NAME
+    client = mc.get_client()
+    count = mc.wipe_collection(client, collection_name)
+    return {
+        "wiped": True,
+        "project": mp.GLOBAL_PROJECT_NAME,
+        "entries_deleted": count,
+    }
+
+
+# ---------------------------------------------------------------------------
 # MCP tool registrations
 # ---------------------------------------------------------------------------
 
