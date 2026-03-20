@@ -27,6 +27,7 @@ Verify the MCP server is responding:
 | User says "remember this" / "save this" | Write `note` with the stated content |
 | Architectural/design decision made | Write `decision` |
 | New code pattern established | Write `code-pattern` |
+| Cross-project knowledge acquired (infra, tools, auth, workflows) | Write to `global_memory_write` instead |
 
 ## Memory Types
 
@@ -69,6 +70,39 @@ docker-based ChromaDB to avoid daemon dependency.
 Next: implement muninn.py MCP server (Task 4). muninn_chroma.py done,
 muninn_embed.py done, muninn_project.py done. Start with FastMCP registration,
 then wire handler functions.
+```
+
+## Writing a Global Memory
+
+Use `global_memory_write` when knowledge applies **across projects** — not just the current one.
+
+Examples of global knowledge:
+- How to log in to OpenShift / Kubernetes clusters
+- VPN or SSH tunnel setup steps
+- Preferred CLI flags for frequently used tools
+- Organisation-wide workflow conventions
+- Authentication procedures (SSO, token renewal, etc.)
+
+```
+global_memory_write(
+  text="<self-contained, reusable procedure or pattern>",
+  memory_type="<type>",
+  tags="<infra,tool-name,category>"
+)
+```
+
+### Good global text examples
+
+**note (infra procedure):**
+```
+OpenShift login: oc login --token=$(oc whoami -t) --server=https://api.cluster.example.com:6443
+If token expired, go to the OpenShift console → top-right menu → Copy login command.
+```
+
+**note (tool pattern):**
+```
+To port-forward a Kubernetes service: kubectl port-forward svc/<name> <local>:<remote> -n <namespace>
+Use --address 0.0.0.0 to expose to the local network.
 ```
 
 ## Tags to Always Include
