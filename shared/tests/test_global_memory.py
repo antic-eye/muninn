@@ -74,16 +74,14 @@ class TestGlobalMemoryHandlers:
         result = handle_global_memory_delete(entry_id=written["id"])
         assert result["deleted"] is True
 
-    def test_handle_global_memory_delete_not_found(self, fake_client, fake_embedding):
+    def test_handle_global_memory_delete_not_found(self, fake_client):
         from muninn import handle_global_memory_delete
 
         result = handle_global_memory_delete(entry_id="nonexistent-id")
         assert result["deleted"] is False
         assert result["error"] == "not found"
 
-    def test_handle_global_memory_wipe_requires_confirm(
-        self, fake_client, fake_embedding
-    ):
+    def test_handle_global_memory_wipe_requires_confirm(self, fake_client):
         from muninn import handle_global_memory_wipe
 
         with pytest.raises(ValueError, match="confirm=True"):
@@ -114,11 +112,24 @@ class TestGlobalMemoryHandlers:
         handle_memory_write(text="project-only data", memory_type="note", tags="")
         handle_global_memory_write(text="global-only data", memory_type="note", tags="")
 
-        project_results = handle_memory_search(query="global-only data", top_k=5)
-        global_results = handle_global_memory_search(query="project-only data", top_k=5)
+        project_results = handle_memory_search(query="project-only data", top_k=5)
+        global_results = handle_global_memory_search(query="global-only data", top_k=5)
 
         project_texts = [r["document"] for r in project_results]
         global_texts = [r["document"] for r in global_results]
 
-        assert not any("global-only" in t for t in project_texts)
-        assert not any("project-only" in t for t in global_texts)
+        # Positive: correct document is present in each collection
+        assert any("project-only" in t for t in project_texts), (
+            "project data not found in project collection"
+        )
+        assert any("global-only" in t for t in global_texts), (
+            "global data not found in global collection"
+        )
+
+        # Negative: cross-contamination absent
+        assert not any("global-only" in t for t in project_texts), (
+            "global data leaked into project collection"
+        )
+        assert not any("project-only" in t for t in global_texts), (
+            "project data leaked into global collection"
+        )

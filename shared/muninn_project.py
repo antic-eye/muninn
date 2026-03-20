@@ -68,6 +68,4 @@ def sanitise_collection_name(project_name: str) -> str:
 # ---------------------------------------------------------------------------
 
 GLOBAL_PROJECT_NAME = "__global__"
-GLOBAL_COLLECTION_NAME = sanitise_collection_name(
-    GLOBAL_PROJECT_NAME
-)  # → 'muninn___global'
+GLOBAL_COLLECTION_NAME = sanitise_collection_name(GLOBAL_PROJECT_NAME)
