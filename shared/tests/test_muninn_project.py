@@ -85,3 +85,10 @@ class TestSanitiseCollectionName:
         result = sanitise_collection_name(long_name)
         assert len(result) <= 63
         assert result[-1].isalnum()
+
+
+def test_global_constants_exist():
+    import muninn_project as mp
+
+    assert mp.GLOBAL_PROJECT_NAME == "__global__"
+    assert mp.GLOBAL_COLLECTION_NAME == "muninn___global__"

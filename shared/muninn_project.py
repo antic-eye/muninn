@@ -57,3 +57,11 @@ def sanitise_collection_name(project_name: str) -> str:
             f"Sanitised collection name too short after cleaning: {truncated!r}"
         )
     return truncated
+
+
+# ---------------------------------------------------------------------------
+# Global memory constants
+# ---------------------------------------------------------------------------
+
+GLOBAL_PROJECT_NAME = "__global__"
+GLOBAL_COLLECTION_NAME = "muninn___global__"
