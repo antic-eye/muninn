@@ -7,6 +7,7 @@ muninn_embed.py — Ollama embedding via HTTP for Muninn.
 Env vars:
     MUNINN_OLLAMA_URL    Ollama base URL (default: http://localhost:11434)
     MUNINN_EMBED_MODEL   Embedding model  (default: mxbai-embed-large:latest)
+    MUNINN_OLLAMA_TOKEN  Bearer token for authenticated Ollama endpoints (optional)
 """
 
 import os
@@ -15,6 +16,15 @@ import httpx
 
 OLLAMA_URL = os.environ.get("MUNINN_OLLAMA_URL", "http://localhost:11434").rstrip("/")
 EMBED_MODEL = os.environ.get("MUNINN_EMBED_MODEL", "mxbai-embed-large:latest")
+OLLAMA_TOKEN = os.environ.get("MUNINN_OLLAMA_TOKEN", "")
+
+
+def _build_headers() -> dict[str, str]:
+    """Return HTTP headers for Ollama requests, including auth if configured."""
+    headers: dict[str, str] = {}
+    if OLLAMA_TOKEN:
+        headers["Authorization"] = f"Bearer {OLLAMA_TOKEN}"
+    return headers
 
 
 class EmbeddingError(RuntimeError):
@@ -31,7 +41,7 @@ def get_embedding(text: str) -> list[float]:
     payload = {"model": EMBED_MODEL, "input": text}
 
     try:
-        response = httpx.post(url, json=payload, timeout=30.0)
+        response = httpx.post(url, json=payload, headers=_build_headers(), timeout=30.0)
         response.raise_for_status()
     except httpx.HTTPStatusError as exc:
         raise EmbeddingError(

@@ -21,11 +21,9 @@ Memory is stored locally in `~/.config/opencode/muninn/chroma/` using ChromaDB (
 ## Prerequisites
 
 1. **uv** — [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/)
-2. **Ollama** running locally with `mxbai-embed-large`:
-   ```bash
-   ollama pull mxbai-embed-large
-   ollama serve  # should already be running
-   ```
+2. **Ollama** with `mxbai-embed-large` — can be local or remote:
+   - **Local:** `ollama pull mxbai-embed-large && ollama serve`
+   - **Remote:** any Ollama-compatible endpoint (e.g. Mimir) — set `MUNINN_OLLAMA_URL` and optionally `MUNINN_OLLAMA_TOKEN`
 
 ---
 
@@ -71,11 +69,32 @@ After updating `opencode.json`, restart OpenCode to pick up the new MCP server.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MUNINN_OLLAMA_URL` | `http://localhost:11434` | Ollama base URL |
+| `MUNINN_OLLAMA_URL` | `http://localhost:11434` | Ollama base URL (local or remote) |
+| `MUNINN_OLLAMA_TOKEN` | *(unset)* | Bearer token for authenticated Ollama endpoints (e.g. Mimir) |
 | `MUNINN_EMBED_MODEL` | `mxbai-embed-large:latest` | Ollama embedding model |
 | `MUNINN_DATA_DIR` | `~/.config/opencode/muninn` | ChromaDB storage path |
 | `MUNINN_TOP_K` | `5` | Default number of search results |
 | `MUNINN_PROJECT` | *(auto-detected)* | Override project name |
+
+### Using a remote Ollama endpoint (e.g. Mimir)
+
+```json
+"muninn": {
+  "type": "local",
+  "command": [
+    "uv", "run",
+    "/path/to/opencode/skills/muninn/shared/muninn.py"
+  ],
+  "environment": {
+    "MUNINN_OLLAMA_URL": "https://your-mimir-host/v1",
+    "MUNINN_OLLAMA_TOKEN": "your-bearer-token",
+    "MUNINN_DATA_DIR": "/Users/your-username/.config/opencode/muninn"
+  },
+  "enabled": true
+}
+```
+
+When `MUNINN_OLLAMA_TOKEN` is set, every embedding request includes an `Authorization: Bearer <token>` header.
 
 ---
 
@@ -123,7 +142,7 @@ memory_list_projects()
 
 If Muninn is connected, this returns a (possibly empty) list. If you see an error, check that:
 1. `uv` is on your PATH
-2. Ollama is running: `curl http://localhost:11434/api/tags`
+2. Ollama is reachable: `curl $MUNINN_OLLAMA_URL/api/tags` (or `curl http://localhost:11434/api/tags` for local)
 3. The path in `opencode.json` points to the correct `muninn.py`
 
 ---
