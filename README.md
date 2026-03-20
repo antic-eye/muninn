@@ -4,7 +4,7 @@
 
 > *Muninn (Old Norse: "memory") is one of Odin's two ravens — the raven of memory.*
 
-Muninn is a per-project semantic memory layer for OpenCode. It gives AI coding sessions persistent, searchable memory — so you never have to re-explain your project from scratch.
+Muninn is a semantic memory layer for OpenCode. It gives AI coding sessions persistent, searchable memory — so you never have to re-explain your project from scratch.
 
 ## What it does
 
@@ -12,8 +12,9 @@ Muninn is a per-project semantic memory layer for OpenCode. It gives AI coding s
 - **Decision tracking** — record architectural decisions with their rationale
 - **Pattern memory** — save code conventions that apply across the project
 - **Semantic search** — find relevant memories by meaning, not exact keywords
+- **Global memory** — store cross-project knowledge (infra procedures, tool patterns, auth flows) that persists across all projects
 
-Memory is stored locally in `~/.config/opencode/muninn/chroma/` using ChromaDB (embedded). Each project gets its own isolated collection.
+Memory is stored locally in `~/.config/opencode/muninn/chroma/` using ChromaDB (embedded). Each project gets its own isolated collection. A special `__global__` collection holds cross-project knowledge.
 
 ---
 
@@ -81,6 +82,8 @@ After updating `opencode.json`, restart OpenCode to pick up the new MCP server.
 
 ## MCP Tools
 
+### Project-scoped tools
+
 | Tool | Description |
 |------|-------------|
 | `memory_write` | Write a memory entry (text, type, tags) |
@@ -90,14 +93,24 @@ After updating `opencode.json`, restart OpenCode to pick up the new MCP server.
 | `memory_wipe_project` | Delete ALL memories for a project (requires `confirm=True`) |
 | `memory_list_projects` | List all projects that have stored memories |
 
+### Global tools (cross-project)
+
+| Tool | Description |
+|------|-------------|
+| `global_memory_write` | Write a cross-project memory (infra procedures, tool patterns, auth flows, etc.) |
+| `global_memory_search` | Semantic search across global memories |
+| `global_memory_list` | List global memories (paginated) |
+| `global_memory_delete` | Delete a global memory entry by ID |
+| `global_memory_wipe` | Delete ALL global memories (requires `confirm=True`) |
+
 ---
 
 ## Skills
 
 Two companion skills guide the agent:
 
-- **memory-read** — Load project context at session start
-- **memory-write** — Save decisions, summaries, and next steps
+- **memory-read** — Load project context + global context at session start
+- **memory-write** — Save decisions, summaries, next steps, and cross-project knowledge
 
 ---
 
