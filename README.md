@@ -40,9 +40,6 @@ Edit `~/.opencode/opencode.json` and add the `muninn` entry under `"mcp"`:
   "type": "local",
   "command": [
     "uv", "run",
-    "--with", "mcp[cli]",
-    "--with", "chromadb",
-    "--with", "httpx",
     "/path/to/opencode/skills/muninn/shared/muninn.py"
   ],
   "environment": {
@@ -52,6 +49,8 @@ Edit `~/.opencode/opencode.json` and add the `muninn` entry under `"mcp"`:
   "enabled": true
 }
 ```
+
+> **No `--with` flags needed.** `muninn.py` uses [PEP 723](https://peps.python.org/pep-0723/) inline script metadata — `uv` reads the `# /// script` block at the top of the file and installs `mcp[cli]`, `chromadb`, and `httpx` automatically.
 
 Replace `/path/to/opencode/skills/` with the actual path to your skills repository.
 
