@@ -110,7 +110,11 @@ def handle_memory_wipe_project(
 def handle_memory_list_projects() -> list[str]:
     client = mc.get_client()
     collections = client.list_collections()
-    return [c.name for c in collections if c.name.startswith("muninn_")]
+    return [
+        c.name.removeprefix("muninn_")
+        for c in collections
+        if c.name.startswith("muninn_")
+    ]
 
 
 # ---------------------------------------------------------------------------

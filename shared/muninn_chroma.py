@@ -25,11 +25,17 @@ class MemoryNotFoundError(KeyError):
     """Raised when a memory entry ID is not found in the collection."""
 
 
+_client: chromadb.PersistentClient | None = None
+
+
 def get_client() -> chromadb.PersistentClient:
     """Return (or create) the persistent ChromaDB client."""
-    chroma_path = DATA_DIR / "chroma"
-    chroma_path.mkdir(parents=True, exist_ok=True)
-    return chromadb.PersistentClient(path=str(chroma_path))
+    global _client
+    if _client is None:
+        chroma_path = DATA_DIR / "chroma"
+        chroma_path.mkdir(parents=True, exist_ok=True)
+        _client = chromadb.PersistentClient(path=str(chroma_path))
+    return _client
 
 
 def get_collection(client: chromadb.ClientAPI, name: str) -> Collection:
@@ -99,6 +105,10 @@ def list_memories(
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     """Return paginated memory entries (chronological by insertion order)."""
+    if limit <= 0:
+        raise ValueError(f"limit must be positive, got {limit}")
+    if offset < 0:
+        raise ValueError(f"offset must be non-negative, got {offset}")
     results = collection.get(
         limit=limit,
         offset=offset,
@@ -126,7 +136,10 @@ def delete_memory(collection: Collection, entry_id: str) -> None:
 
 def wipe_collection(client: chromadb.ClientAPI, collection_name: str) -> int:
     """Delete all entries in a collection. Returns count deleted."""
-    col = get_collection(client, collection_name)
+    existing_names = [c.name for c in client.list_collections()]
+    if collection_name not in existing_names:
+        return 0
+    col = client.get_collection(collection_name)
     count = col.count()
     if count > 0:
         all_ids = col.get(include=[])["ids"]

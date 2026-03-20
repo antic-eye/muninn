@@ -41,11 +41,15 @@ def sanitise_collection_name(project_name: str) -> str:
     ChromaDB rules: 3-63 chars, alphanumeric + hyphens/underscores,
     must start/end with alphanumeric.
 
-    Raises ValueError if project_name is empty.
+    Raises ValueError if project_name is empty or has no alphanumeric characters.
     """
     if not project_name or not project_name.strip():
         raise ValueError("project_name must not be empty")
     safe = re.sub(r"[^a-zA-Z0-9_-]", "_", project_name)
+    if not re.search(r"[a-zA-Z0-9]", safe):
+        raise ValueError(
+            f"project_name contains no alphanumeric characters after sanitisation: {project_name!r}"
+        )
     prefixed = f"muninn_{safe}"
     truncated = prefixed[:63].rstrip("_-")
     if len(truncated) < 3:

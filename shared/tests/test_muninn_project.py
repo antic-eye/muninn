@@ -76,6 +76,10 @@ class TestSanitiseCollectionName:
         with pytest.raises(ValueError, match="must not be empty"):
             sanitise_collection_name("")
 
+    def test_all_special_chars_raises(self):
+        with pytest.raises(ValueError, match="no alphanumeric"):
+            sanitise_collection_name("!!!")
+
     def test_truncated_ends_with_alnum(self):
         long_name = "a" * 100
         result = sanitise_collection_name(long_name)

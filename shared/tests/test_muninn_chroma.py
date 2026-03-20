@@ -93,6 +93,13 @@ class TestListMemories:
         assert len(results) == 3
         assert all("id" in r and "document" in r and "metadata" in r for r in results)
 
+    def test_invalid_limit_raises_value_error(self, chroma_client):
+        from muninn_chroma import list_memories, get_collection
+
+        col = get_collection(chroma_client, "muninn_test")
+        with pytest.raises(ValueError, match="limit must be positive"):
+            list_memories(col, limit=0)
+
 
 class TestWipeCollection:
     def test_wipe_returns_count_and_empties_collection(self, chroma_client):
