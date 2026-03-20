@@ -8,13 +8,20 @@ muninn.py — MCP server entry point for Muninn per-project memory.
 Usage (via uv run):
     uv run muninn.py
 
-MCP tools exposed:
+MCP tools exposed (project-scoped):
     memory_write          Write a memory entry
     memory_search         Semantic search
     memory_list           List recent memories (paginated)
     memory_delete         Delete by ID
     memory_wipe_project   Delete ALL memories for a project
     memory_list_projects  List all known projects
+
+MCP tools exposed (global scope):
+    global_memory_write   Write a cross-project memory entry
+    global_memory_search  Semantic search across global memories
+    global_memory_list    List global memories (paginated)
+    global_memory_delete  Delete a global entry by ID
+    global_memory_wipe    Delete ALL global memories
 """
 
 from __future__ import annotations
@@ -257,6 +264,75 @@ def memory_wipe_project(project_name: str, confirm: bool = False) -> dict[str, A
 def memory_list_projects() -> list[str]:
     """List all projects that have stored memories."""
     return handle_memory_list_projects()
+
+
+# ---------------------------------------------------------------------------
+# Global memory MCP tool registrations
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def global_memory_write(
+    text: str, memory_type: str = "note", tags: str = ""
+) -> dict[str, Any]:
+    """
+    Write a cross-project memory entry (global scope).
+
+    Use this for knowledge that applies across projects: infrastructure procedures,
+    CLI tool patterns, authentication flows, workflow conventions, etc.
+
+    Args:
+        text: The content to remember
+        memory_type: One of: summary, decision, next-steps, code-pattern, note
+        tags: Comma-separated tags, e.g. "openshift,auth,infra"
+    """
+    return handle_global_memory_write(text, memory_type, tags)
+
+
+@mcp.tool()
+def global_memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
+    """
+    Semantic search across global (cross-project) memories.
+
+    Args:
+        query: Natural language search query
+        top_k: Number of results to return (default 5)
+    """
+    return handle_global_memory_search(query, top_k)
+
+
+@mcp.tool()
+def global_memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
+    """
+    List global memory entries in insertion order.
+
+    Args:
+        limit: Max entries to return (default 20)
+        offset: Pagination offset (default 0)
+    """
+    return handle_global_memory_list(limit, offset)
+
+
+@mcp.tool()
+def global_memory_delete(entry_id: str) -> dict[str, Any]:
+    """
+    Delete a specific global memory entry by its ID.
+
+    Args:
+        entry_id: The UUID of the entry to delete
+    """
+    return handle_global_memory_delete(entry_id)
+
+
+@mcp.tool()
+def global_memory_wipe(confirm: bool = False) -> dict[str, Any]:
+    """
+    Delete ALL global memory entries. DESTRUCTIVE.
+
+    Args:
+        confirm: Must be True to proceed
+    """
+    return handle_global_memory_wipe(confirm)
 
 
 # ---------------------------------------------------------------------------
