@@ -370,7 +370,7 @@ def _git_info() -> tuple[str, str]:
 
 
 def format_write_result(result: dict[str, Any], tags: str = "") -> str:
-    entry_id = result["id"][:8] + "…"
+    entry_id = (result.get("id") or "????????")[:8] + "…"
     project = result.get("project", "unknown")
     memory_type = result.get("type", "note")
     tag_str = f" · tags: `{tags}`" if tags else ""
@@ -388,16 +388,17 @@ def format_search_results(results: list[dict[str, Any]]) -> str:
         date = meta.get("session_date", "")
         tags = meta.get("tags", "")
         distance = r.get("distance", 0.0)
-        score = 1.0 - distance
+        score = max(0.0, min(1.0, 1.0 - distance))
         document = r.get("document", "")
         tag_part = f" · tags: `{tags}`" if tags else ""
         lines.append(
             f"**{i}.** `{memory_type}` · {date}{tag_part} · score: {score:.2f}"
         )
-        lines.append(f"> {document}")
-        lines.append("")
-        lines.append("---")
-        lines.append("")
+        lines.append("> " + document.replace("\n", "\n> "))
+        if i < n:
+            lines.append("")
+            lines.append("---")
+            lines.append("")
     return "\n".join(lines).rstrip()
 
 
@@ -416,15 +417,16 @@ def format_list_results(results: list[dict[str, Any]], offset: int = 0) -> str:
         document = r.get("document", "")
         tag_part = f" · tags: `{tags}`" if tags else ""
         lines.append(f"**{i}.** `{memory_type}` · {date}{tag_part}")
-        lines.append(f"> {document}")
-        lines.append("")
-        lines.append("---")
-        lines.append("")
+        lines.append("> " + document.replace("\n", "\n> "))
+        if i < n:
+            lines.append("")
+            lines.append("---")
+            lines.append("")
     return "\n".join(lines).rstrip()
 
 
 def format_delete_result(result: dict[str, Any]) -> str:
-    entry_id = result["id"][:8] + "…"
+    entry_id = (result.get("id") or "????????")[:8] + "…"
     if result.get("deleted"):
         return f"🗑️ Deleted memory `{entry_id}`"
     error = result.get("error", "unknown error")

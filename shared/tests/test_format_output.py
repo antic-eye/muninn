@@ -4,7 +4,6 @@ Unit tests for Markdown formatter functions in muninn.py.
 
 import os
 import sys
-import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -33,12 +32,13 @@ class TestFormatWriteResult:
         md = format_write_result(result, tags="")
         assert "✅" in md
         assert "note" in md
+        assert "tags" not in md
 
 
 class TestFormatSearchResults:
     def test_empty(self):
         md = format_search_results([])
-        assert "No memories" in md or "0" in md
+        assert md == "_No memories matched your query._"
 
     def test_single_result(self):
         results = [
@@ -71,11 +71,23 @@ class TestFormatSearchResults:
         md = format_search_results(results)
         assert "3" in md or md.count("**") >= 3
 
+    def test_score_displayed(self):
+        results = [
+            {
+                "id": "x",
+                "document": "doc",
+                "metadata": {"type": "note", "session_date": "2026-01-01", "tags": ""},
+                "distance": 0.1,
+            }
+        ]
+        md = format_search_results(results)
+        assert "score: 0.90" in md
+
 
 class TestFormatListResults:
     def test_empty(self):
         md = format_list_results([], offset=0)
-        assert "No memories" in md or "0" in md
+        assert "_No memories found (offset 0)._" == md
 
     def test_with_entries(self):
         entries = [
@@ -101,7 +113,7 @@ class TestFormatListResults:
 class TestFormatDeleteResult:
     def test_deleted(self):
         md = format_delete_result({"deleted": True, "id": "abc12345-xxxx"})
-        assert "🗑️" in md or "Deleted" in md
+        assert "🗑️" in md
         assert "abc12345" in md
 
     def test_not_found(self):
