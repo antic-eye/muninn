@@ -276,9 +276,7 @@ def memory_list_projects() -> str:
 
 
 @mcp.tool()
-def global_memory_write(
-    text: str, memory_type: str = "note", tags: str = ""
-) -> dict[str, Any]:
+def global_memory_write(text: str, memory_type: str = "note", tags: str = "") -> str:
     """
     Write a cross-project memory entry (global scope).
 
@@ -290,11 +288,12 @@ def global_memory_write(
         memory_type: One of: summary, decision, next-steps, code-pattern, note
         tags: Comma-separated tags, e.g. "openshift,auth,infra"
     """
-    return handle_global_memory_write(text, memory_type, tags)
+    result = handle_global_memory_write(text, memory_type, tags)
+    return format_write_result(result, tags=tags)
 
 
 @mcp.tool()
-def global_memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
+def global_memory_search(query: str, top_k: int = 5) -> str:
     """
     Semantic search across global (cross-project) memories.
 
@@ -302,11 +301,12 @@ def global_memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
         query: Natural language search query
         top_k: Number of results to return (default 5)
     """
-    return handle_global_memory_search(query, top_k)
+    results = handle_global_memory_search(query, top_k)
+    return format_search_results(results)
 
 
 @mcp.tool()
-def global_memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
+def global_memory_list(limit: int = 20, offset: int = 0) -> str:
     """
     List global memory entries in insertion order.
 
@@ -314,29 +314,32 @@ def global_memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]
         limit: Max entries to return (default 20)
         offset: Pagination offset (default 0)
     """
-    return handle_global_memory_list(limit, offset)
+    results = handle_global_memory_list(limit, offset)
+    return format_list_results(results, offset=offset)
 
 
 @mcp.tool()
-def global_memory_delete(entry_id: str) -> dict[str, Any]:
+def global_memory_delete(entry_id: str) -> str:
     """
     Delete a specific global memory entry by its ID.
 
     Args:
         entry_id: The UUID of the entry to delete
     """
-    return handle_global_memory_delete(entry_id)
+    result = handle_global_memory_delete(entry_id)
+    return format_delete_result(result)
 
 
 @mcp.tool()
-def global_memory_wipe(confirm: bool = False) -> dict[str, Any]:
+def global_memory_wipe(confirm: bool = False) -> str:
     """
     Delete ALL global memory entries. DESTRUCTIVE.
 
     Args:
         confirm: Must be True to proceed
     """
-    return handle_global_memory_wipe(confirm)
+    result = handle_global_memory_wipe(confirm)
+    return format_wipe_result(result)
 
 
 # ---------------------------------------------------------------------------
