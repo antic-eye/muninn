@@ -199,9 +199,7 @@ def handle_global_memory_wipe(confirm: bool = False) -> dict[str, Any]:
 
 
 @mcp.tool()
-def memory_write(
-    text: str, memory_type: str = "note", tags: str = ""
-) -> dict[str, Any]:
+def memory_write(text: str, memory_type: str = "note", tags: str = "") -> str:
     """
     Write a memory entry for the current project.
 
@@ -210,11 +208,12 @@ def memory_write(
         memory_type: One of: summary, decision, next-steps, code-pattern, note
         tags: Comma-separated tags, e.g. "auth,refactor,jira"
     """
-    return handle_memory_write(text, memory_type, tags)
+    result = handle_memory_write(text, memory_type, tags)
+    return format_write_result(result, tags=tags)
 
 
 @mcp.tool()
-def memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
+def memory_search(query: str, top_k: int = 5) -> str:
     """
     Semantic search across memories for the current project.
 
@@ -222,11 +221,12 @@ def memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
         query: Natural language search query
         top_k: Number of results to return (default 5)
     """
-    return handle_memory_search(query, top_k)
+    results = handle_memory_search(query, top_k)
+    return format_search_results(results)
 
 
 @mcp.tool()
-def memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
+def memory_list(limit: int = 20, offset: int = 0) -> str:
     """
     List memory entries for the current project in insertion order.
 
@@ -234,22 +234,24 @@ def memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
         limit: Max entries to return (default 20)
         offset: Pagination offset (default 0)
     """
-    return handle_memory_list(limit, offset)
+    results = handle_memory_list(limit, offset)
+    return format_list_results(results, offset=offset)
 
 
 @mcp.tool()
-def memory_delete(entry_id: str) -> dict[str, Any]:
+def memory_delete(entry_id: str) -> str:
     """
     Delete a specific memory entry by its ID.
 
     Args:
         entry_id: The UUID of the entry to delete
     """
-    return handle_memory_delete(entry_id)
+    result = handle_memory_delete(entry_id)
+    return format_delete_result(result)
 
 
 @mcp.tool()
-def memory_wipe_project(project_name: str, confirm: bool = False) -> dict[str, Any]:
+def memory_wipe_project(project_name: str, confirm: bool = False) -> str:
     """
     Delete ALL memory entries for a named project. DESTRUCTIVE.
 
@@ -257,13 +259,15 @@ def memory_wipe_project(project_name: str, confirm: bool = False) -> dict[str, A
         project_name: The project name (as returned by memory_list_projects)
         confirm: Must be True to proceed
     """
-    return handle_memory_wipe_project(project_name, confirm)
+    result = handle_memory_wipe_project(project_name, confirm)
+    return format_wipe_result(result)
 
 
 @mcp.tool()
-def memory_list_projects() -> list[str]:
+def memory_list_projects() -> str:
     """List all projects that have stored memories."""
-    return handle_memory_list_projects()
+    projects = handle_memory_list_projects()
+    return format_projects_list(projects)
 
 
 # ---------------------------------------------------------------------------
