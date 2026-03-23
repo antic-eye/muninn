@@ -364,5 +364,89 @@ def _git_info() -> tuple[str, str]:
         return "", ""
 
 
+# ---------------------------------------------------------------------------
+# Markdown formatters — convert handler output to human-readable strings
+# ---------------------------------------------------------------------------
+
+
+def format_write_result(result: dict[str, Any], tags: str = "") -> str:
+    entry_id = result["id"][:8] + "…"
+    project = result.get("project", "unknown")
+    memory_type = result.get("type", "note")
+    tag_str = f" · tags: `{tags}`" if tags else ""
+    return f"✅ Memory saved — **{memory_type}** · `{entry_id}` · project: `{project}`{tag_str}"
+
+
+def format_search_results(results: list[dict[str, Any]]) -> str:
+    if not results:
+        return "_No memories matched your query._"
+    n = len(results)
+    lines = [f"### 🔍 Memory Search — {n} result{'s' if n != 1 else ''}\n"]
+    for i, r in enumerate(results, 1):
+        meta = r.get("metadata") or {}
+        memory_type = meta.get("type", "note")
+        date = meta.get("session_date", "")
+        tags = meta.get("tags", "")
+        distance = r.get("distance", 0.0)
+        score = 1.0 - distance
+        document = r.get("document", "")
+        tag_part = f" · tags: `{tags}`" if tags else ""
+        lines.append(
+            f"**{i}.** `{memory_type}` · {date}{tag_part} · score: {score:.2f}"
+        )
+        lines.append(f"> {document}")
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+    return "\n".join(lines).rstrip()
+
+
+def format_list_results(results: list[dict[str, Any]], offset: int = 0) -> str:
+    if not results:
+        return f"_No memories found (offset {offset})._"
+    n = len(results)
+    lines = [
+        f"### 📋 Memories — {n} entr{'y' if n == 1 else 'ies'} (offset {offset})\n"
+    ]
+    for i, r in enumerate(results, 1):
+        meta = r.get("metadata") or {}
+        memory_type = meta.get("type", "note")
+        date = meta.get("session_date", "")
+        tags = meta.get("tags", "")
+        document = r.get("document", "")
+        tag_part = f" · tags: `{tags}`" if tags else ""
+        lines.append(f"**{i}.** `{memory_type}` · {date}{tag_part}")
+        lines.append(f"> {document}")
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+    return "\n".join(lines).rstrip()
+
+
+def format_delete_result(result: dict[str, Any]) -> str:
+    entry_id = result["id"][:8] + "…"
+    if result.get("deleted"):
+        return f"🗑️ Deleted memory `{entry_id}`"
+    error = result.get("error", "unknown error")
+    return f"⚠️ Memory `{entry_id}` not found — nothing deleted. ({error})"
+
+
+def format_wipe_result(result: dict[str, Any]) -> str:
+    project = result.get("project", "unknown")
+    count = result.get("entries_deleted", 0)
+    return (
+        f"💥 Wiped **{project}** — {count} entr{'y' if count == 1 else 'ies'} deleted."
+    )
+
+
+def format_projects_list(projects: list[str]) -> str:
+    if not projects:
+        return "_No projects found._"
+    lines = ["### 📁 Projects with memories\n"]
+    for p in projects:
+        lines.append(f"- `{p}`")
+    return "\n".join(lines)
+
+
 if __name__ == "__main__":
     mcp.run()
