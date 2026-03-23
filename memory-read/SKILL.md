@@ -64,6 +64,9 @@ Combine the results into a **Session Brief** with these sections:
 - <relevant global patterns or procedures, if any>
 ```
 
+> **Note:** `memory_search` and `memory_list` now return Markdown directly.
+> Extract data from the formatted text to populate the brief sections above.
+
 If there are no global memories, omit the "Global context" section entirely.
 
 Present the brief to the user *before* asking what to work on.

@@ -113,5 +113,10 @@ Use --address 0.0.0.0 to expose to the local network.
 
 ## After Writing
 
-Confirm to the user:
-> "Memory saved ✓ (type: {type}, id: {id[:8]}…)"
+The tool returns a Markdown confirmation directly, for example:
+
+```
+✅ Memory saved — **decision** · `3f2a1b4c…` · project: `muninn` · tags: `auth`
+```
+
+No additional confirmation message is needed — the tool output IS the confirmation.

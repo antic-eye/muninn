@@ -199,9 +199,7 @@ def handle_global_memory_wipe(confirm: bool = False) -> dict[str, Any]:
 
 
 @mcp.tool()
-def memory_write(
-    text: str, memory_type: str = "note", tags: str = ""
-) -> dict[str, Any]:
+def memory_write(text: str, memory_type: str = "note", tags: str = "") -> str:
     """
     Write a memory entry for the current project.
 
@@ -210,11 +208,12 @@ def memory_write(
         memory_type: One of: summary, decision, next-steps, code-pattern, note
         tags: Comma-separated tags, e.g. "auth,refactor,jira"
     """
-    return handle_memory_write(text, memory_type, tags)
+    result = handle_memory_write(text, memory_type, tags)
+    return format_write_result(result, tags=tags)
 
 
 @mcp.tool()
-def memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
+def memory_search(query: str, top_k: int = 5) -> str:
     """
     Semantic search across memories for the current project.
 
@@ -222,11 +221,12 @@ def memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
         query: Natural language search query
         top_k: Number of results to return (default 5)
     """
-    return handle_memory_search(query, top_k)
+    results = handle_memory_search(query, top_k)
+    return format_search_results(results)
 
 
 @mcp.tool()
-def memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
+def memory_list(limit: int = 20, offset: int = 0) -> str:
     """
     List memory entries for the current project in insertion order.
 
@@ -234,22 +234,24 @@ def memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
         limit: Max entries to return (default 20)
         offset: Pagination offset (default 0)
     """
-    return handle_memory_list(limit, offset)
+    results = handle_memory_list(limit, offset)
+    return format_list_results(results, offset=offset)
 
 
 @mcp.tool()
-def memory_delete(entry_id: str) -> dict[str, Any]:
+def memory_delete(entry_id: str) -> str:
     """
     Delete a specific memory entry by its ID.
 
     Args:
         entry_id: The UUID of the entry to delete
     """
-    return handle_memory_delete(entry_id)
+    result = handle_memory_delete(entry_id)
+    return format_delete_result(result)
 
 
 @mcp.tool()
-def memory_wipe_project(project_name: str, confirm: bool = False) -> dict[str, Any]:
+def memory_wipe_project(project_name: str, confirm: bool = False) -> str:
     """
     Delete ALL memory entries for a named project. DESTRUCTIVE.
 
@@ -257,13 +259,15 @@ def memory_wipe_project(project_name: str, confirm: bool = False) -> dict[str, A
         project_name: The project name (as returned by memory_list_projects)
         confirm: Must be True to proceed
     """
-    return handle_memory_wipe_project(project_name, confirm)
+    result = handle_memory_wipe_project(project_name, confirm)
+    return format_wipe_result(result)
 
 
 @mcp.tool()
-def memory_list_projects() -> list[str]:
+def memory_list_projects() -> str:
     """List all projects that have stored memories."""
-    return handle_memory_list_projects()
+    projects = handle_memory_list_projects()
+    return format_projects_list(projects)
 
 
 # ---------------------------------------------------------------------------
@@ -272,9 +276,7 @@ def memory_list_projects() -> list[str]:
 
 
 @mcp.tool()
-def global_memory_write(
-    text: str, memory_type: str = "note", tags: str = ""
-) -> dict[str, Any]:
+def global_memory_write(text: str, memory_type: str = "note", tags: str = "") -> str:
     """
     Write a cross-project memory entry (global scope).
 
@@ -286,11 +288,12 @@ def global_memory_write(
         memory_type: One of: summary, decision, next-steps, code-pattern, note
         tags: Comma-separated tags, e.g. "openshift,auth,infra"
     """
-    return handle_global_memory_write(text, memory_type, tags)
+    result = handle_global_memory_write(text, memory_type, tags)
+    return format_write_result(result, tags=tags)
 
 
 @mcp.tool()
-def global_memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
+def global_memory_search(query: str, top_k: int = 5) -> str:
     """
     Semantic search across global (cross-project) memories.
 
@@ -298,11 +301,12 @@ def global_memory_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
         query: Natural language search query
         top_k: Number of results to return (default 5)
     """
-    return handle_global_memory_search(query, top_k)
+    results = handle_global_memory_search(query, top_k)
+    return format_search_results(results)
 
 
 @mcp.tool()
-def global_memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
+def global_memory_list(limit: int = 20, offset: int = 0) -> str:
     """
     List global memory entries in insertion order.
 
@@ -310,29 +314,32 @@ def global_memory_list(limit: int = 20, offset: int = 0) -> list[dict[str, Any]]
         limit: Max entries to return (default 20)
         offset: Pagination offset (default 0)
     """
-    return handle_global_memory_list(limit, offset)
+    results = handle_global_memory_list(limit, offset)
+    return format_list_results(results, offset=offset)
 
 
 @mcp.tool()
-def global_memory_delete(entry_id: str) -> dict[str, Any]:
+def global_memory_delete(entry_id: str) -> str:
     """
     Delete a specific global memory entry by its ID.
 
     Args:
         entry_id: The UUID of the entry to delete
     """
-    return handle_global_memory_delete(entry_id)
+    result = handle_global_memory_delete(entry_id)
+    return format_delete_result(result)
 
 
 @mcp.tool()
-def global_memory_wipe(confirm: bool = False) -> dict[str, Any]:
+def global_memory_wipe(confirm: bool = False) -> str:
     """
     Delete ALL global memory entries. DESTRUCTIVE.
 
     Args:
         confirm: Must be True to proceed
     """
-    return handle_global_memory_wipe(confirm)
+    result = handle_global_memory_wipe(confirm)
+    return format_wipe_result(result)
 
 
 # ---------------------------------------------------------------------------
@@ -362,6 +369,92 @@ def _git_info() -> tuple[str, str]:
         return branch, commit
     except (subprocess.CalledProcessError, FileNotFoundError):
         return "", ""
+
+
+# ---------------------------------------------------------------------------
+# Markdown formatters — convert handler output to human-readable strings
+# ---------------------------------------------------------------------------
+
+
+def format_write_result(result: dict[str, Any], tags: str = "") -> str:
+    entry_id = (result.get("id") or "????????")[:8] + "…"
+    project = result.get("project", "unknown")
+    memory_type = result.get("type", "note")
+    tag_str = f" · tags: `{tags}`" if tags else ""
+    return f"✅ Memory saved — **{memory_type}** · `{entry_id}` · project: `{project}`{tag_str}"
+
+
+def format_search_results(results: list[dict[str, Any]]) -> str:
+    if not results:
+        return "_No memories matched your query._"
+    n = len(results)
+    lines = [f"### 🔍 Memory Search — {n} result{'s' if n != 1 else ''}\n"]
+    for i, r in enumerate(results, 1):
+        meta = r.get("metadata") or {}
+        memory_type = meta.get("type", "note")
+        date = meta.get("session_date", "")
+        tags = meta.get("tags", "")
+        distance = r.get("distance", 0.0)
+        score = max(0.0, min(1.0, 1.0 - distance))
+        document = r.get("document", "")
+        tag_part = f" · tags: `{tags}`" if tags else ""
+        lines.append(
+            f"**{i}.** `{memory_type}` · {date}{tag_part} · score: {score:.2f}"
+        )
+        lines.append("> " + document.replace("\n", "\n> "))
+        if i < n:
+            lines.append("")
+            lines.append("---")
+            lines.append("")
+    return "\n".join(lines).rstrip()
+
+
+def format_list_results(results: list[dict[str, Any]], offset: int = 0) -> str:
+    if not results:
+        return f"_No memories found (offset {offset})._"
+    n = len(results)
+    lines = [
+        f"### 📋 Memories — {n} entr{'y' if n == 1 else 'ies'} (offset {offset})\n"
+    ]
+    for i, r in enumerate(results, 1):
+        meta = r.get("metadata") or {}
+        memory_type = meta.get("type", "note")
+        date = meta.get("session_date", "")
+        tags = meta.get("tags", "")
+        document = r.get("document", "")
+        tag_part = f" · tags: `{tags}`" if tags else ""
+        lines.append(f"**{i}.** `{memory_type}` · {date}{tag_part}")
+        lines.append("> " + document.replace("\n", "\n> "))
+        if i < n:
+            lines.append("")
+            lines.append("---")
+            lines.append("")
+    return "\n".join(lines).rstrip()
+
+
+def format_delete_result(result: dict[str, Any]) -> str:
+    entry_id = (result.get("id") or "????????")[:8] + "…"
+    if result.get("deleted"):
+        return f"🗑️ Deleted memory `{entry_id}`"
+    error = result.get("error", "unknown error")
+    return f"⚠️ Memory `{entry_id}` not found — nothing deleted. ({error})"
+
+
+def format_wipe_result(result: dict[str, Any]) -> str:
+    project = result.get("project", "unknown")
+    count = result.get("entries_deleted", 0)
+    return (
+        f"💥 Wiped **{project}** — {count} entr{'y' if count == 1 else 'ies'} deleted."
+    )
+
+
+def format_projects_list(projects: list[str]) -> str:
+    if not projects:
+        return "_No projects found._"
+    lines = ["### 📁 Projects with memories\n"]
+    for p in projects:
+        lines.append(f"- `{p}`")
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
