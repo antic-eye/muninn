@@ -126,3 +126,22 @@ class TestToolHandlers:
         result = handle_memory_delete(entry_id="nonexistent-id")
         assert result["deleted"] is False
         assert result["error"] == "not found"
+
+    def test_handle_memory_list_projects_excludes_symbol_collections(
+        self, fake_client, fake_embedding, monkeypatch
+    ):
+        import muninn_project as mp
+
+        monkeypatch.setattr(mp, "detect_project_name", lambda: "proj-a")
+        from muninn import (
+            handle_memory_write,
+            handle_symbol_index,
+            handle_memory_list_projects,
+        )
+
+        handle_memory_write(text="proj-a memory", memory_type="note", tags="")
+        handle_symbol_index(
+            [{"name": "f", "kind": "function", "file": "x.py", "line": 1}]
+        )
+        projects = handle_memory_list_projects()
+        assert not any("__symbols" in p for p in projects)

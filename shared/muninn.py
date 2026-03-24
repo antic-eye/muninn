@@ -121,7 +121,7 @@ def handle_memory_list_projects() -> list[str]:
     return [
         c.name.removeprefix("muninn_")
         for c in collections
-        if c.name.startswith("muninn_")
+        if c.name.startswith("muninn_") and "__symbols" not in c.name
     ]
 
 
