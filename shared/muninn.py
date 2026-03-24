@@ -452,7 +452,7 @@ def global_memory_wipe(confirm: bool = False) -> str:
 
 
 @mcp.tool()
-def symbol_index(symbols: list[dict]) -> str:
+def symbol_index(symbols: list[dict[str, Any]]) -> str:
     """
     Index one or more code symbols into the project's symbol collection.
 
