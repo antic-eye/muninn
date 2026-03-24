@@ -75,6 +75,7 @@ class TestHandleSymbolIndex:
         results = handle_symbol_search("my_func", top_k=5)
         # should still only have 1 entry (upsert, not duplicate)
         assert len(results) == 1
+        assert results[0]["metadata"]["docstring"] == "updated docstring"
 
     def test_raises_on_missing_required_fields(
         self, fake_client, fake_embedding, project
@@ -83,3 +84,54 @@ class TestHandleSymbolIndex:
 
         with pytest.raises((KeyError, ValueError)):
             handle_symbol_index([{"kind": "function"}])  # missing name and file
+
+
+class TestHandleSymbolSearch:
+    def test_returns_empty_list_when_no_symbols(
+        self, fake_client, fake_embedding, project
+    ):
+        from muninn import handle_symbol_search
+
+        results = handle_symbol_search("validate jwt", top_k=5)
+        assert results == []
+
+    def test_returns_results_after_indexing(self, fake_client, fake_embedding, project):
+        from muninn import handle_symbol_index, handle_symbol_search
+
+        handle_symbol_index(
+            [
+                {
+                    "name": "validate_jwt",
+                    "kind": "function",
+                    "file": "auth/jwt.py",
+                    "line": 42,
+                    "signature": "def validate_jwt(token: str) -> dict",
+                    "docstring": "Validates a JWT token and returns decoded payload.",
+                    "callers": ["login_handler"],
+                }
+            ]
+        )
+        results = handle_symbol_search("JWT validation", top_k=5)
+        assert len(results) >= 1
+        assert results[0]["metadata"]["name"] == "validate_jwt"
+
+    def test_result_has_expected_keys(self, fake_client, fake_embedding, project):
+        from muninn import handle_symbol_index, handle_symbol_search
+
+        handle_symbol_index(
+            [
+                {
+                    "name": "MyClass",
+                    "kind": "class",
+                    "file": "models.py",
+                    "line": 1,
+                }
+            ]
+        )
+        results = handle_symbol_search("MyClass", top_k=5)
+        assert len(results) == 1
+        r = results[0]
+        assert "id" in r
+        assert "document" in r
+        assert "metadata" in r
+        assert "distance" in r
