@@ -447,6 +447,69 @@ def global_memory_wipe(confirm: bool = False) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Symbol index MCP tool registrations
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def symbol_index(symbols: list[dict]) -> str:
+    """
+    Index one or more code symbols into the project's symbol collection.
+
+    Call this when opening or editing a source file. Pass all top-level symbols
+    (functions, classes, methods, constants, type aliases) found in the file.
+
+    Args:
+        symbols: List of symbol dicts. Each requires: name, kind, file, line.
+                 Optional: signature, docstring, callers (list of str).
+    """
+    result = handle_symbol_index(symbols)
+    return format_symbol_index_result(result)
+
+
+@mcp.tool()
+def symbol_search(query: str, top_k: int = 5) -> str:
+    """
+    Semantic search over the project's symbol index.
+
+    Use before grepping — this is faster and understands intent.
+    Examples: "function that validates JWT", "class for user repository"
+
+    Args:
+        query: Natural language description of the symbol you're looking for
+        top_k: Max results to return (default 5)
+    """
+    results = handle_symbol_search(query, top_k)
+    return format_symbol_search_results(results)
+
+
+@mcp.tool()
+def symbol_delete_file(file_path: str) -> str:
+    """
+    Remove all indexed symbols for a given file.
+
+    Call this when a file is deleted, renamed, or fully rewritten before re-indexing.
+
+    Args:
+        file_path: Relative path to the file (e.g. "auth/jwt.py")
+    """
+    result = handle_symbol_delete_file(file_path)
+    return format_symbol_delete_file_result(result)
+
+
+@mcp.tool()
+def symbol_wipe(confirm: bool = False) -> str:
+    """
+    Delete the entire symbol index for the current project. DESTRUCTIVE.
+
+    Args:
+        confirm: Must be True to proceed
+    """
+    result = handle_symbol_wipe(confirm)
+    return format_symbol_wipe_result(result)
+
+
+# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
