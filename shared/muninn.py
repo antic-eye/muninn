@@ -27,6 +27,7 @@ MCP tools exposed (global scope):
 from __future__ import annotations
 
 import datetime
+import hashlib
 import subprocess
 import uuid
 from typing import Any
@@ -191,6 +192,88 @@ def handle_global_memory_wipe(confirm: bool = False) -> dict[str, Any]:
         "project": mp.GLOBAL_PROJECT_NAME,
         "entries_deleted": count,
     }
+
+
+# ---------------------------------------------------------------------------
+# Symbol index helpers (private)
+# ---------------------------------------------------------------------------
+
+
+def _symbol_id(project: str, file: str, name: str, kind: str) -> str:
+    raw = f"{project}:{file}:{name}:{kind}"
+    return hashlib.sha1(raw.encode()).hexdigest()[:16]
+
+
+def _symbol_document(sym: dict[str, Any]) -> str:
+    kind = sym.get("kind", "symbol")
+    name = sym.get("name", "")
+    file = sym.get("file", "")
+    docstring = sym.get("docstring", "")
+    signature = sym.get("signature", "")
+    callers = sym.get("callers", [])
+    callers_str = ", ".join(callers) if isinstance(callers, list) else str(callers)
+    parts = [f"{kind} {name} in {file}"]
+    if docstring:
+        parts.append(f"— {docstring}")
+    parts.append(f"Signature: {signature or 'N/A'}.")
+    if callers_str:
+        parts.append(f"Called by: {callers_str}.")
+    return " ".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Symbol handlers (pure Python, testable without MCP server)
+# ---------------------------------------------------------------------------
+
+
+def handle_symbol_index(symbols: list[dict[str, Any]]) -> dict[str, Any]:
+    """Upsert one or more symbols into the project's symbol collection."""
+    if not symbols:
+        raise ValueError("symbols list must not be empty")
+    project = mp.detect_project_name()
+    collection_name = mp.symbol_collection_name(project)
+    client = mc.get_client()
+    col = mc.get_collection(client, collection_name)
+
+    today = datetime.date.today().isoformat()
+    for sym in symbols:
+        name = sym["name"]  # raises KeyError if missing — intentional
+        kind = sym["kind"]  # raises KeyError if missing — intentional
+        file = sym["file"]  # raises KeyError if missing — intentional
+        line = sym.get("line", 0)
+        signature = sym.get("signature", "")
+        docstring = sym.get("docstring", "")
+        callers = sym.get("callers", [])
+        callers_str = ", ".join(callers) if isinstance(callers, list) else str(callers)
+
+        entry_id = _symbol_id(project, file, name, kind)
+        document = _symbol_document(sym)
+        embedding = me.get_embedding(document)
+        metadata = {
+            "kind": kind,
+            "name": name,
+            "file": file,
+            "line": line,
+            "signature": signature,
+            "docstring": docstring,
+            "callers": callers_str,
+            "project": project,
+            "indexed_at": today,
+        }
+        mc.upsert_memory(col, entry_id, document, embedding, metadata)
+
+    primary_file = symbols[0]["file"]
+    return {"count": len(symbols), "file": primary_file, "project": project}
+
+
+def handle_symbol_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
+    """Semantic search over the project's symbol collection."""
+    project = mp.detect_project_name()
+    collection_name = mp.symbol_collection_name(project)
+    client = mc.get_client()
+    col = mc.get_collection(client, collection_name)
+    query_embedding = me.get_embedding(query)
+    return mc.query_memory(col, query_embedding, top_k=top_k)
 
 
 # ---------------------------------------------------------------------------
