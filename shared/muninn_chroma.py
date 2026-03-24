@@ -145,3 +145,19 @@ def wipe_collection(client: chromadb.ClientAPI, collection_name: str) -> int:
         all_ids = col.get(include=[])["ids"]
         col.delete(ids=all_ids)
     return count
+
+
+def delete_symbols_by_file(collection: Collection, file_path: str) -> int:
+    """
+    Delete all symbol entries for a given file path.
+
+    Returns the count of deleted entries.
+    """
+    if collection.count() == 0:
+        return 0
+    results = collection.get(where={"file": file_path}, include=[])
+    ids = results["ids"]
+    if not ids:
+        return 0
+    collection.delete(ids=ids)
+    return len(ids)
