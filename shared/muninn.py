@@ -276,6 +276,27 @@ def handle_symbol_search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
     return mc.query_memory(col, query_embedding, top_k=top_k)
 
 
+def handle_symbol_delete_file(file_path: str) -> dict[str, Any]:
+    """Delete all symbols indexed for a given file path."""
+    project = mp.detect_project_name()
+    collection_name = mp.symbol_collection_name(project)
+    client = mc.get_client()
+    col = mc.get_collection(client, collection_name)
+    deleted = mc.delete_symbols_by_file(col, file_path)
+    return {"deleted": deleted, "file": file_path, "project": project}
+
+
+def handle_symbol_wipe(confirm: bool = False) -> dict[str, Any]:
+    """Delete the entire symbol index for the current project."""
+    if not confirm:
+        raise ValueError("Set confirm=True to wipe the symbol index.")
+    project = mp.detect_project_name()
+    collection_name = mp.symbol_collection_name(project)
+    client = mc.get_client()
+    count = mc.wipe_collection(client, collection_name)
+    return {"wiped": True, "project": project, "entries_deleted": count}
+
+
 # ---------------------------------------------------------------------------
 # MCP tool registrations
 # ---------------------------------------------------------------------------

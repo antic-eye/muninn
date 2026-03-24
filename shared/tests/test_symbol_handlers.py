@@ -135,3 +135,37 @@ class TestHandleSymbolSearch:
         assert "document" in r
         assert "metadata" in r
         assert "distance" in r
+
+
+class TestHandleSymbolDeleteFile:
+    def test_deletes_symbols_for_file(self, fake_client, fake_embedding, project):
+        from muninn import handle_symbol_index, handle_symbol_delete_file
+
+        handle_symbol_index(
+            [
+                {
+                    "name": "func_a",
+                    "kind": "function",
+                    "file": "auth/jwt.py",
+                    "line": 1,
+                },
+                {
+                    "name": "func_b",
+                    "kind": "function",
+                    "file": "auth/jwt.py",
+                    "line": 10,
+                },
+                {"name": "func_c", "kind": "function", "file": "other.py", "line": 5},
+            ]
+        )
+        result = handle_symbol_delete_file("auth/jwt.py")
+        assert result["deleted"] == 2
+        assert result["file"] == "auth/jwt.py"
+
+    def test_returns_zero_when_file_not_indexed(
+        self, fake_client, fake_embedding, project
+    ):
+        from muninn import handle_symbol_delete_file
+
+        result = handle_symbol_delete_file("nonexistent.py")
+        assert result["deleted"] == 0
