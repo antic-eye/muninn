@@ -69,3 +69,14 @@ def sanitise_collection_name(project_name: str) -> str:
 
 GLOBAL_PROJECT_NAME = "__global__"
 GLOBAL_COLLECTION_NAME = sanitise_collection_name(GLOBAL_PROJECT_NAME)
+
+
+def symbol_collection_name(project_name: str) -> str:
+    """
+    Return the ChromaDB collection name for the symbol index of a project.
+
+    Appends '__symbols' suffix before sanitisation so the suffix is included
+    in the 63-char truncation budget.
+    """
+    raw = f"{project_name}__symbols"
+    return sanitise_collection_name(raw)
