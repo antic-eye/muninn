@@ -561,5 +561,55 @@ def format_projects_list(projects: list[str]) -> str:
     return "\n".join(lines)
 
 
+def format_symbol_index_result(result: dict[str, Any]) -> str:
+    count = result.get("count", 0)
+    file = result.get("file", "unknown")
+    noun = "symbol" if count == 1 else "symbols"
+    return f"✅ Indexed {count} {noun} in `{file}`"
+
+
+def format_symbol_search_results(results: list[dict[str, Any]]) -> str:
+    if not results:
+        return "_No symbols matched your query._"
+    n = len(results)
+    lines = [f"### 🔎 Symbol Search — {n} result{'s' if n != 1 else ''}\n"]
+    for i, r in enumerate(results, 1):
+        meta = r.get("metadata") or {}
+        kind = meta.get("kind", "symbol")
+        name = meta.get("name", "?")
+        file = meta.get("file", "?")
+        line = meta.get("line", "?")
+        signature = meta.get("signature", "")
+        docstring = meta.get("docstring", "")
+        distance = r.get("distance", 0.0)
+        score = max(0.0, min(1.0, 1.0 - distance))
+        lines.append(
+            f"**{i}.** `{kind}` **{name}** · {file}:{line} · score: {score:.2f}"
+        )
+        if signature:
+            lines.append(f"> `{signature}`")
+        if docstring:
+            lines.append(f"> {docstring}")
+        if i < n:
+            lines.append("")
+            lines.append("---")
+            lines.append("")
+    return "\n".join(lines).rstrip()
+
+
+def format_symbol_delete_file_result(result: dict[str, Any]) -> str:
+    deleted = result.get("deleted", 0)
+    file = result.get("file", "unknown")
+    noun = "symbol" if deleted == 1 else "symbols"
+    return f"🗑️ Removed {deleted} {noun} from `{file}`"
+
+
+def format_symbol_wipe_result(result: dict[str, Any]) -> str:
+    project = result.get("project", "unknown")
+    count = result.get("entries_deleted", 0)
+    noun = "entry" if count == 1 else "entries"
+    return f"💥 Wiped symbol index for **{project}** — {count} {noun} deleted."
+
+
 if __name__ == "__main__":
     mcp.run()
