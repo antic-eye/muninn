@@ -24,13 +24,13 @@ class TestFormatSymbolIndexResult:
     def test_single_symbol(self):
         result = {"count": 1, "file": "models.py", "project": "p"}
         md = format_symbol_index_result(result)
-        assert "1" in md
+        assert "1 symbol" in md  # confirms singular form
 
 
 class TestFormatSymbolSearchResults:
     def test_empty(self):
         md = format_symbol_search_results([])
-        assert "_No symbols" in md or "0" in md or "No" in md
+        assert md == "_No symbols matched your query._"
 
     def test_single_result_full_metadata(self):
         results = [
@@ -98,6 +98,8 @@ class TestFormatSymbolSearchResults:
         md = format_symbol_search_results(results)
         assert "3" in md
         assert "func1" in md and "func2" in md and "func3" in md
+        assert "---" in md
+        assert md.count("---") == 2  # 3 results → 2 separators
 
 
 class TestFormatSymbolDeleteFileResult:
@@ -111,7 +113,8 @@ class TestFormatSymbolDeleteFileResult:
     def test_deleted_zero(self):
         result = {"deleted": 0, "file": "ghost.py", "project": "p"}
         md = format_symbol_delete_file_result(result)
-        assert "0" in md or "no symbols" in md.lower() or "ghost.py" in md
+        assert "0 symbols" in md
+        assert "ghost.py" in md
 
 
 class TestFormatSymbolWipeResult:
