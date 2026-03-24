@@ -169,3 +169,31 @@ class TestHandleSymbolDeleteFile:
 
         result = handle_symbol_delete_file("nonexistent.py")
         assert result["deleted"] == 0
+
+
+class TestHandleSymbolWipe:
+    def test_wipe_requires_confirm(self, fake_client, fake_embedding, project):
+        from muninn import handle_symbol_wipe
+
+        with pytest.raises(ValueError, match="confirm=True"):
+            handle_symbol_wipe(confirm=False)
+
+    def test_wipe_deletes_all_symbols(self, fake_client, fake_embedding, project):
+        from muninn import handle_symbol_index, handle_symbol_wipe
+
+        handle_symbol_index(
+            [
+                {"name": "a", "kind": "function", "file": "x.py", "line": 1},
+                {"name": "b", "kind": "function", "file": "x.py", "line": 2},
+            ]
+        )
+        result = handle_symbol_wipe(confirm=True)
+        assert result["wiped"] is True
+        assert result["entries_deleted"] == 2
+
+    def test_wipe_empty_index_returns_zero(self, fake_client, fake_embedding, project):
+        from muninn import handle_symbol_wipe
+
+        result = handle_symbol_wipe(confirm=True)
+        assert result["wiped"] is True
+        assert result["entries_deleted"] == 0
