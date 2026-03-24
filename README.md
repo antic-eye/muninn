@@ -13,6 +13,7 @@ Muninn is a semantic memory layer for OpenCode. It gives AI coding sessions pers
 - **Pattern memory** — save code conventions that apply across the project
 - **Semantic search** — find relevant memories by meaning, not exact keywords
 - **Global memory** — store cross-project knowledge (infra procedures, tool patterns, auth flows) that persists across all projects
+- **Symbol index** — index code symbols (functions, classes, methods) and search them semantically so the AI can navigate large codebases without re-reading files
 
 Memory is stored locally in `~/.config/opencode/muninn/chroma/` using ChromaDB (embedded). Each project gets its own isolated collection. A special `__global__` collection holds cross-project knowledge.
 
@@ -57,6 +58,7 @@ Replace `/path/to/opencode/skills/` with the actual path to your skills reposito
 ```bash
 ln -s /path/to/opencode/skills/muninn/memory-read ~/.config/opencode/skills/memory-read
 ln -s /path/to/opencode/skills/muninn/memory-write ~/.config/opencode/skills/memory-write
+ln -s /path/to/opencode/skills/muninn/symbol-search ~/.config/opencode/skills/symbol-search
 ```
 
 ### 3. Restart OpenCode
@@ -121,6 +123,17 @@ When `MUNINN_OLLAMA_TOKEN` is set, every embedding request includes an `Authoriz
 | `global_memory_delete` | Delete a global memory entry by ID |
 | `global_memory_wipe` | Delete ALL global memories (requires `confirm=True`) |
 
+### Symbol tools (per-project code index)
+
+| Tool | Description |
+|------|-------------|
+| `symbol_index` | Index one or more code symbols — name, kind, file, signature, docstring, callers |
+| `symbol_search` | Semantic search across indexed symbols by natural-language query |
+| `symbol_delete_file` | Remove all symbols belonging to a given file path |
+| `symbol_wipe` | Delete the entire symbol index for a project (requires `confirm=True`) |
+
+Each symbol is stored in a dedicated ChromaDB collection named `<project>__symbols`, separate from the memory collection. Symbol entries are keyed by a deterministic ID (`sha1(<project>:<file>:<name>:<kind>)[:16]`), so re-indexing a symbol overwrites the previous entry rather than creating a duplicate.
+
 ---
 
 ## Skills
@@ -129,6 +142,7 @@ Two companion skills guide the agent:
 
 - **memory-read** — Load project context + global context at session start
 - **memory-write** — Save decisions, summaries, next steps, and cross-project knowledge
+- **symbol-search** — Guide when and how to index code symbols and search them by meaning
 
 ---
 
