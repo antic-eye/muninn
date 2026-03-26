@@ -50,3 +50,9 @@ coverage.xml
 
 # Logs
 *.log
+
+# ChromaDB data (if MUNINN_DATA_DIR points inside the repo)
+chroma/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
