@@ -1,9 +1,9 @@
 """
-muninn_mcp/cli.py — Entry point for the muninn-mcp command.
+muninn_mcp/cli.py — Entry point for the muninn-remembers command.
 
 Usage:
-    uvx muninn-mcp            # Start the MCP server (stdio transport)
-    uvx muninn-mcp install    # Copy skill files to ~/.config/opencode/skills/
+    uvx muninn-remembers            # Start the MCP server (stdio transport)
+    uvx muninn-remembers install    # Copy skill files to ~/.config/opencode/skills/
 """
 
 import shutil
@@ -33,7 +33,7 @@ def main() -> None:
             _install_skills()
         else:
             print(f"Unknown command: {sys.argv[1]!r}", file=sys.stderr)
-            print("Usage: muninn-mcp [install]", file=sys.stderr)
+            print("Usage: muninn-remembers [install]", file=sys.stderr)
             sys.exit(1)
     else:
         from muninn_mcp.server import mcp

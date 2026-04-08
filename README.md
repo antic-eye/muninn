@@ -33,7 +33,7 @@ Memory is stored locally in `~/.config/opencode/muninn/chroma/` using ChromaDB (
 ### 1. Install skills
 
 ```bash
-uvx muninn-mcp install
+uvx muninn-remembers install
 ```
 
 This copies the companion skills (`memory-read`, `memory-write`, `symbol-search`) to `~/.config/opencode/skills/`.
@@ -45,7 +45,7 @@ Edit `~/.opencode/opencode.json` and add the `muninn` entry under `"mcp"`:
 ```json
 "muninn": {
   "type": "local",
-  "command": ["uvx", "muninn-mcp"],
+  "command": ["uvx", "muninn-remembers"],
   "environment": {
     "MUNINN_OLLAMA_URL": "http://localhost:11434",
     "MUNINN_DATA_DIR": "/Users/your-username/.config/opencode/muninn"
@@ -54,7 +54,7 @@ Edit `~/.opencode/opencode.json` and add the `muninn` entry under `"mcp"`:
 }
 ```
 
-`uvx` downloads and runs `muninn-mcp` from PyPI automatically — no cloning or path management needed.
+`uvx` downloads and runs `muninn-remembers` from PyPI automatically — no cloning or path management needed.
 
 ### 3. Restart OpenCode
 
@@ -78,7 +78,7 @@ After updating `opencode.json`, restart OpenCode to pick up the new MCP server.
 ```json
 "muninn": {
   "type": "local",
-  "command": ["uvx", "muninn-mcp"],
+  "command": ["uvx", "muninn-remembers"],
   "environment": {
     "MUNINN_OLLAMA_URL": "https://your-mimir-host/v1",
     "MUNINN_OLLAMA_TOKEN": "your-bearer-token",
@@ -149,7 +149,7 @@ memory_list_projects()
 If Muninn is connected, this returns a (possibly empty) list. If you see an error, check that:
 1. `uv` is on your PATH
 2. Ollama is reachable: `curl $MUNINN_OLLAMA_URL/api/tags` (or `curl http://localhost:11434/api/tags` for local)
-3. `muninn-mcp` is available: `uvx muninn-mcp --version 2>/dev/null || uvx muninn-mcp install`
+3. `muninn-remembers` is available: `uvx muninn-remembers --version 2>/dev/null || uvx muninn-remembers install`
 
 ---
 

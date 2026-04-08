@@ -1,4 +1,4 @@
-"""Tests for the muninn-mcp CLI entry point."""
+"""Tests for the muninn-remembers CLI entry point."""
 
 import shutil
 import sys
@@ -49,7 +49,7 @@ def test_unknown_subcommand_exits_with_error(capsys):
     """Unknown subcommands print an error and exit 1 instead of starting the server."""
     from muninn_mcp.cli import main
 
-    with patch.object(sys, "argv", ["muninn-mcp", "badcommand"]):
+    with patch.object(sys, "argv", ["muninn-remembers", "badcommand"]):
         with pytest.raises(SystemExit) as exc_info:
             main()
     assert exc_info.value.code == 1
