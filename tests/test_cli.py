@@ -1,6 +1,5 @@
 """Tests for the muninn-remembers CLI entry point."""
 
-import shutil
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -8,41 +7,98 @@ from unittest.mock import patch
 import pytest
 
 
-def test_install_creates_skill_directories(tmp_path):
-    """install subcommand copies each skill directory to the target location."""
-    from muninn_mcp.cli import _install_skills
+def test_install_opencode_creates_skill_directories(tmp_path):
+    """install opencode copies each skill as a subdirectory with SKILL.md."""
+    from muninn_mcp.cli import _install_opencode
 
-    target = tmp_path / ".config" / "opencode" / "skills"
-    _install_skills(target=target)
+    target = tmp_path / "skills"
+    _install_opencode(target=target)
 
     assert (target / "memory-read" / "SKILL.md").exists()
     assert (target / "memory-write" / "SKILL.md").exists()
     assert (target / "symbol-search" / "SKILL.md").exists()
 
 
-def test_install_creates_target_directory_if_missing(tmp_path):
-    """install creates the target directory if it does not exist."""
-    from muninn_mcp.cli import _install_skills
+def test_install_opencode_creates_target_directory_if_missing(tmp_path):
+    """install opencode creates the target directory if it does not exist."""
+    from muninn_mcp.cli import _install_opencode
 
     target = tmp_path / "does" / "not" / "exist"
     assert not target.exists()
-    _install_skills(target=target)
+    _install_opencode(target=target)
     assert target.exists()
 
 
-def test_install_overwrites_existing_files(tmp_path):
-    """install overwrites existing SKILL.md files without error."""
-    from muninn_mcp.cli import _install_skills
+def test_install_opencode_overwrites_existing_files(tmp_path):
+    """install opencode overwrites existing SKILL.md files without error."""
+    from muninn_mcp.cli import _install_opencode
 
     target = tmp_path / "skills"
-    target.mkdir(parents=True)
     existing = target / "memory-read" / "SKILL.md"
     existing.parent.mkdir(parents=True)
     existing.write_text("old content")
 
-    _install_skills(target=target)
+    _install_opencode(target=target)
 
     assert existing.read_text() != "old content"
+
+
+def test_install_claude_creates_flat_command_files(tmp_path):
+    """install claude copies each skill as a flat <name>.md file."""
+    from muninn_mcp.cli import _install_claude
+
+    target = tmp_path / "commands"
+    _install_claude(target=target)
+
+    assert (target / "memory-read.md").exists()
+    assert (target / "memory-write.md").exists()
+    assert (target / "symbol-search.md").exists()
+
+
+def test_install_claude_creates_target_directory_if_missing(tmp_path):
+    """install claude creates the target directory if it does not exist."""
+    from muninn_mcp.cli import _install_claude
+
+    target = tmp_path / "does" / "not" / "exist"
+    assert not target.exists()
+    _install_claude(target=target)
+    assert target.exists()
+
+
+def test_install_claude_file_content_matches_skill_md(tmp_path):
+    """install claude copies SKILL.md content verbatim."""
+    from muninn_mcp.cli import _install_claude
+    from muninn_mcp import cli as cli_module
+
+    target = tmp_path / "commands"
+    _install_claude(target=target)
+
+    source = Path(cli_module.__file__).parent / "skills" / "memory-read" / "SKILL.md"
+    assert (target / "memory-read.md").read_text() == source.read_text()
+
+
+def test_install_no_target_shows_usage_and_exits(capsys):
+    """bare 'install' with no target prints usage with both options and exits 1."""
+    from muninn_mcp.cli import main
+
+    with patch.object(sys, "argv", ["muninn-remembers", "install"]):
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+    assert exc_info.value.code == 1
+    captured = capsys.readouterr()
+    assert "opencode" in captured.err
+    assert "claude" in captured.err
+
+
+def test_install_unknown_target_exits_with_error(capsys):
+    """install with an unknown target exits 1 with an error message."""
+    from muninn_mcp.cli import main
+
+    with patch.object(sys, "argv", ["muninn-remembers", "install", "vscode"]):
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+    assert exc_info.value.code == 1
+    assert "vscode" in capsys.readouterr().err
 
 
 def test_unknown_subcommand_exits_with_error(capsys):
