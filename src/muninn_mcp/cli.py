@@ -28,8 +28,13 @@ def _install_skills(target: Path | None = None) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) > 1 and sys.argv[1] == "install":
-        _install_skills()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "install":
+            _install_skills()
+        else:
+            print(f"Unknown command: {sys.argv[1]!r}", file=sys.stderr)
+            print("Usage: muninn-mcp [install]", file=sys.stderr)
+            sys.exit(1)
     else:
         from muninn_mcp.server import mcp
         mcp.run()

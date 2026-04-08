@@ -1,6 +1,8 @@
 [project]
 name = "muninn-mcp"
 version = "0.1.0"
+description = "Semantic memory layer for OpenCode AI coding sessions"
+license = { file = "LICENSE" }
 requires-python = ">=3.10"
 dependencies = ["mcp[cli]", "chromadb", "httpx"]
 
