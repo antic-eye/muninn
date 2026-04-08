@@ -51,6 +51,9 @@ coverage.xml
 # Logs
 *.log
 
+# Git worktrees
+.worktrees/
+
 # ChromaDB data (if MUNINN_DATA_DIR points inside the repo)
 chroma/
 *.sqlite3
