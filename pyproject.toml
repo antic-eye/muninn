@@ -1,6 +1,6 @@
 [project]
 name = "muninn-remembers"
-version = "0.1.0"
+version = "0.1.4"
 description = "Semantic memory layer for OpenCode AI coding sessions"
 readme = "README.md"
 license = { file = "LICENSE" }
