@@ -1,0 +1,35 @@
+"""
+muninn_mcp/cli.py — Entry point for the muninn-mcp command.
+
+Usage:
+    uvx muninn-mcp            # Start the MCP server (stdio transport)
+    uvx muninn-mcp install    # Copy skill files to ~/.config/opencode/skills/
+"""
+
+import shutil
+import sys
+from pathlib import Path
+
+
+def _install_skills(target: Path | None = None) -> None:
+    """Copy bundled skill directories to *target* (default: ~/.config/opencode/skills/)."""
+    if target is None:
+        target = Path.home() / ".config" / "opencode" / "skills"
+    skills_dir = Path(__file__).parent / "skills"
+    for skill_dir in skills_dir.iterdir():
+        if not skill_dir.is_dir():
+            continue
+        dest = target / skill_dir.name
+        dest.mkdir(parents=True, exist_ok=True)
+        for f in skill_dir.iterdir():
+            shutil.copy2(str(f), str(dest / f.name))
+            print(f"Installed: {dest / f.name}")
+    print(f"\nSkills installed to: {target}")
+
+
+def main() -> None:
+    if len(sys.argv) > 1 and sys.argv[1] == "install":
+        _install_skills()
+    else:
+        from muninn_mcp.server import mcp
+        mcp.run()
