@@ -30,17 +30,22 @@ Memory is stored locally in `~/.config/opencode/muninn/chroma/` using ChromaDB (
 
 ## Installation
 
-### 1. Add MCP server to opencode.json
+### 1. Install skills
+
+```bash
+uvx muninn-mcp install
+```
+
+This copies the companion skills (`memory-read`, `memory-write`, `symbol-search`) to `~/.config/opencode/skills/`.
+
+### 2. Add MCP server to opencode.json
 
 Edit `~/.opencode/opencode.json` and add the `muninn` entry under `"mcp"`:
 
 ```json
 "muninn": {
   "type": "local",
-  "command": [
-    "uv", "run",
-    "/path/to/opencode/skills/muninn/shared/muninn.py"
-  ],
+  "command": ["uvx", "muninn-mcp"],
   "environment": {
     "MUNINN_OLLAMA_URL": "http://localhost:11434",
     "MUNINN_DATA_DIR": "/Users/your-username/.config/opencode/muninn"
@@ -49,17 +54,7 @@ Edit `~/.opencode/opencode.json` and add the `muninn` entry under `"mcp"`:
 }
 ```
 
-> **No `--with` flags needed.** `muninn.py` uses [PEP 723](https://peps.python.org/pep-0723/) inline script metadata — `uv` reads the `# /// script` block at the top of the file and installs `mcp[cli]`, `chromadb`, and `httpx` automatically.
-
-Replace `/path/to/opencode/skills/` with the actual path to your skills repository.
-
-### 2. Symlink the skills
-
-```bash
-ln -s /path/to/opencode/skills/muninn/memory-read ~/.config/opencode/skills/memory-read
-ln -s /path/to/opencode/skills/muninn/memory-write ~/.config/opencode/skills/memory-write
-ln -s /path/to/opencode/skills/muninn/symbol-search ~/.config/opencode/skills/symbol-search
-```
+`uvx` downloads and runs `muninn-mcp` from PyPI automatically — no cloning or path management needed.
 
 ### 3. Restart OpenCode
 
@@ -83,10 +78,7 @@ After updating `opencode.json`, restart OpenCode to pick up the new MCP server.
 ```json
 "muninn": {
   "type": "local",
-  "command": [
-    "uv", "run",
-    "/path/to/opencode/skills/muninn/shared/muninn.py"
-  ],
+  "command": ["uvx", "muninn-mcp"],
   "environment": {
     "MUNINN_OLLAMA_URL": "https://your-mimir-host/v1",
     "MUNINN_OLLAMA_TOKEN": "your-bearer-token",
@@ -157,7 +149,7 @@ memory_list_projects()
 If Muninn is connected, this returns a (possibly empty) list. If you see an error, check that:
 1. `uv` is on your PATH
 2. Ollama is reachable: `curl $MUNINN_OLLAMA_URL/api/tags` (or `curl http://localhost:11434/api/tags` for local)
-3. The path in `opencode.json` points to the correct `muninn.py`
+3. `muninn-mcp` is available: `uvx muninn-mcp --version 2>/dev/null || uvx muninn-mcp install`
 
 ---
 
@@ -174,3 +166,22 @@ Muninn auto-detects the current project using this priority order:
 ## Data location
 
 All memory data lives at `~/.config/opencode/muninn/chroma/`. To back up your memories, copy this directory. To start fresh for a project, use `memory_wipe_project`.
+
+---
+
+## Publishing
+
+Releases are published to PyPI automatically when a `v*` tag is pushed:
+
+```bash
+git tag v0.1.0
+git push --tags
+```
+
+**One-time PyPI setup (maintainer only):**
+1. Create an account at [pypi.org](https://pypi.org)
+2. Go to Account → Publishing → Add a Trusted Publisher:
+   - Owner: `antic-eye`
+   - Repository: your GitHub repo name
+   - Workflow: `publish.yml`
+   - Environment: *(leave blank)*
