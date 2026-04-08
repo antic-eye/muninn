@@ -6,6 +6,8 @@
 
 Muninn is a semantic memory layer for OpenCode. It gives AI coding sessions persistent, searchable memory — so you never have to re-explain your project from scratch.
 
+[![Publish to PyPI](https://github.com/antic-eye/muninn/actions/workflows/publish.yml/badge.svg)](https://github.com/antic-eye/muninn/actions/workflows/publish.yml)
+
 ## What it does
 
 - **Session resumption** — load prior context at the start of every session
