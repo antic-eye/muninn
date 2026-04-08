@@ -32,17 +32,17 @@ Memory is stored locally in `~/.config/opencode/muninn/chroma/` using ChromaDB (
 
 ## Installation
 
-### 1. Install skills
+### OpenCode
+
+**1. Install companion skills**
 
 ```bash
-uvx muninn-remembers install
+uvx muninn-remembers install opencode
 ```
 
-This copies the companion skills (`memory-read`, `memory-write`, `symbol-search`) to `~/.config/opencode/skills/`.
+This copies `memory-read`, `memory-write`, and `symbol-search` to `~/.config/opencode/skills/`.
 
-### 2. Add MCP server to opencode.json
-
-Edit `~/.opencode/opencode.json` and add the `muninn` entry under `"mcp"`:
+**2. Add the MCP server to `~/.opencode/opencode.json`**
 
 ```json
 "muninn": {
@@ -56,11 +56,30 @@ Edit `~/.opencode/opencode.json` and add the `muninn` entry under `"mcp"`:
 }
 ```
 
-`uvx` downloads and runs `muninn-remembers` from PyPI automatically — no cloning or path management needed.
+**3. Restart OpenCode** to pick up the new MCP server.
 
-### 3. Restart OpenCode
+---
 
-After updating `opencode.json`, restart OpenCode to pick up the new MCP server.
+### Claude Code
+
+**1. Install companion slash commands**
+
+```bash
+uvx muninn-remembers install claude
+```
+
+This copies `memory-read.md`, `memory-write.md`, and `symbol-search.md` to `~/.claude/commands/`, making them available as `/memory-read`, `/memory-write`, and `/symbol-search` slash commands.
+
+**2. Add the MCP server**
+
+```bash
+claude mcp add muninn \
+  --env MUNINN_OLLAMA_URL=http://localhost:11434 \
+  --env MUNINN_DATA_DIR=/Users/your-username/.config/opencode/muninn \
+  -- uvx muninn-remembers
+```
+
+**3. Verify** by running `/mcp` in Claude Code — `muninn` should appear in the list.
 
 ---
 
@@ -77,6 +96,8 @@ After updating `opencode.json`, restart OpenCode to pick up the new MCP server.
 
 ### Using a remote Ollama endpoint (e.g. Mimir)
 
+**OpenCode** (`opencode.json`):
+
 ```json
 "muninn": {
   "type": "local",
@@ -88,6 +109,16 @@ After updating `opencode.json`, restart OpenCode to pick up the new MCP server.
   },
   "enabled": true
 }
+```
+
+**Claude Code**:
+
+```bash
+claude mcp add muninn \
+  --env MUNINN_OLLAMA_URL=https://your-mimir-host/v1 \
+  --env MUNINN_OLLAMA_TOKEN=your-bearer-token \
+  --env MUNINN_DATA_DIR=/Users/your-username/.config/opencode/muninn \
+  -- uvx muninn-remembers
 ```
 
 When `MUNINN_OLLAMA_TOKEN` is set, every embedding request includes an `Authorization: Bearer <token>` header.
@@ -142,16 +173,16 @@ Two companion skills guide the agent:
 
 ## Verify it works
 
-After installation, in an OpenCode session:
+After installation, call the `memory_list_projects` tool (in OpenCode or Claude Code):
 
 ```
 memory_list_projects()
 ```
 
-If Muninn is connected, this returns a (possibly empty) list. If you see an error, check that:
+This returns a (possibly empty) list if Muninn is connected. If you see an error, check that:
 1. `uv` is on your PATH
 2. Ollama is reachable: `curl $MUNINN_OLLAMA_URL/api/tags` (or `curl http://localhost:11434/api/tags` for local)
-3. `muninn-remembers` is available: `uvx muninn-remembers --version 2>/dev/null || uvx muninn-remembers install`
+3. The MCP server is registered — run `/mcp` in Claude Code, or check `opencode.json` in OpenCode
 
 ---
 
