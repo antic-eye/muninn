@@ -7,6 +7,8 @@
 Muninn is a semantic memory layer for OpenCode. It gives AI coding sessions persistent, searchable memory — so you never have to re-explain your project from scratch.
 
 [![Publish to PyPI](https://github.com/antic-eye/muninn/actions/workflows/publish.yml/badge.svg)](https://github.com/antic-eye/muninn/actions/workflows/publish.yml)
+[![CodeQL Advanced](https://github.com/antic-eye/muninn/actions/workflows/codeql.yml/badge.svg)](https://github.com/antic-eye/muninn/actions/workflows/codeql.yml)
+[![Pylint](https://github.com/antic-eye/muninn/actions/workflows/pylint.yml/badge.svg)](https://github.com/antic-eye/muninn/actions/workflows/pylint.yml)
 
 ## What it does
 
