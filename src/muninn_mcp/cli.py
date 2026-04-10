@@ -46,6 +46,7 @@ def _install_claude(target: Path | None = None) -> None:
 
 
 def main() -> None:
+    """Entry point: start MCP server or run install subcommand."""
     if len(sys.argv) > 1:
         if sys.argv[1] == "install":
             if len(sys.argv) > 2:
@@ -56,17 +57,29 @@ def main() -> None:
                     _install_claude()
                 else:
                     print(f"Unknown install target: {target!r}", file=sys.stderr)
-                    print("Usage: muninn-remembers install [opencode|claude]", file=sys.stderr)
+                    print(
+                        "Usage: muninn-remembers install [opencode|claude]",
+                        file=sys.stderr,
+                    )
                     sys.exit(1)
             else:
-                print("Usage: muninn-remembers install [opencode|claude]", file=sys.stderr)
-                print("  opencode  — install to ~/.config/opencode/skills/", file=sys.stderr)
+                print(
+                    "Usage: muninn-remembers install [opencode|claude]", file=sys.stderr
+                )
+                print(
+                    "  opencode  — install to ~/.config/opencode/skills/",
+                    file=sys.stderr,
+                )
                 print("  claude    — install to ~/.claude/commands/", file=sys.stderr)
                 sys.exit(1)
         else:
             print(f"Unknown command: {sys.argv[1]!r}", file=sys.stderr)
-            print("Usage: muninn-remembers [install opencode|install claude]", file=sys.stderr)
+            print(
+                "Usage: muninn-remembers [install opencode|install claude]",
+                file=sys.stderr,
+            )
             sys.exit(1)
     else:
-        from muninn_mcp.server import mcp
+        from muninn_mcp.server import mcp  # pylint: disable=import-outside-toplevel
+
         mcp.run()
