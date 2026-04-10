@@ -1,0 +1,10 @@
+[MESSAGES CONTROL]
+disable =
+    C0116,  # missing-function-docstring — formatter/test functions are self-documenting
+    C0115,  # missing-class-docstring — test classes are self-documenting
+    W0621,  # redefined-outer-name — standard pytest fixture injection idiom
+    W0613,  # unused-argument — fixtures used for side-effects, standard pytest pattern
+    R0903,  # too-few-public-methods — single-method test helper classes are valid
+
+[FORMAT]
+max-line-length=120
