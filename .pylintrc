@@ -2,8 +2,13 @@
 disable =
     C0116,  # missing-function-docstring — formatter/test functions are self-documenting
     C0115,  # missing-class-docstring — test classes are self-documenting
+    C0114,  # missing-module-docstring — modules without top-level docstrings are acceptable
+    C0415,  # import-outside-toplevel — used intentionally in test fixtures and lazy CLI import
+    C1803,  # use-implicit-booleaness-not-comparison — explicit == [] is clearer in assertions
+    W0212,  # protected-access — tests intentionally access private members for verification
     W0621,  # redefined-outer-name — standard pytest fixture injection idiom
     W0613,  # unused-argument — fixtures used for side-effects, standard pytest pattern
+    W0718,  # broad-exception-caught — test fixtures catch Exception for graceful startup handling
     R0903,  # too-few-public-methods — single-method test helper classes are valid
 
 [FORMAT]
