@@ -215,6 +215,38 @@ def _symbol_document(sym: dict[str, Any]) -> str:
     return " ".join(parts)
 
 
+def _build_symbol_metadata(
+    sym: dict[str, Any], project: str, today: str
+) -> tuple[str, str, dict[str, Any]]:
+    """Extract and normalise fields from a symbol dict for indexing.
+
+    Returns (entry_id, document, metadata).
+    """
+    name = sym["name"]  # raises KeyError if missing — intentional
+    kind = sym["kind"]  # raises KeyError if missing — intentional
+    file = sym["file"]  # raises KeyError if missing — intentional
+    line = sym.get("line", 0)
+    signature = sym.get("signature", "")
+    docstring = sym.get("docstring", "")
+    callers = sym.get("callers", [])
+    callers_str = ", ".join(callers) if isinstance(callers, list) else str(callers)
+
+    entry_id = _symbol_id(project, file, name, kind)
+    document = _symbol_document(sym)
+    metadata = {
+        "kind": kind,
+        "name": name,
+        "file": file,
+        "line": line,
+        "signature": signature,
+        "docstring": docstring,
+        "callers": callers_str,
+        "project": project,
+        "indexed_at": today,
+    }
+    return entry_id, document, metadata
+
+
 # ---------------------------------------------------------------------------
 # Symbol handlers (pure Python, testable without MCP server)
 # ---------------------------------------------------------------------------
@@ -231,29 +263,8 @@ def handle_symbol_index(symbols: list[dict[str, Any]]) -> dict[str, Any]:
 
     today = datetime.date.today().isoformat()
     for sym in symbols:
-        name = sym["name"]  # raises KeyError if missing — intentional
-        kind = sym["kind"]  # raises KeyError if missing — intentional
-        file = sym["file"]  # raises KeyError if missing — intentional
-        line = sym.get("line", 0)
-        signature = sym.get("signature", "")
-        docstring = sym.get("docstring", "")
-        callers = sym.get("callers", [])
-        callers_str = ", ".join(callers) if isinstance(callers, list) else str(callers)
-
-        entry_id = _symbol_id(project, file, name, kind)
-        document = _symbol_document(sym)
+        entry_id, document, metadata = _build_symbol_metadata(sym, project, today)
         embedding = me.get_embedding(document)
-        metadata = {
-            "kind": kind,
-            "name": name,
-            "file": file,
-            "line": line,
-            "signature": signature,
-            "docstring": docstring,
-            "callers": callers_str,
-            "project": project,
-            "indexed_at": today,
-        }
         mc.upsert_memory(col, entry_id, document, embedding, metadata)
 
     primary_file = symbols[0]["file"]
