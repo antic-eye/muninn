@@ -80,6 +80,18 @@ def main() -> None:
             )
             sys.exit(1)
     else:
-        from muninn_mcp.server import mcp  # pylint: disable=import-outside-toplevel
+        try:
+            from muninn_mcp.server import mcp  # pylint: disable=import-outside-toplevel
+        except ModuleNotFoundError as exc:
+            if "chromadb" in str(exc).lower():
+                print(
+                    f"Error: could not load the chromadb backend ({exc}).\n"
+                    "The virtual environment may be incomplete — try running:\n"
+                    "  uv sync --directory /path/to/muninn\n"
+                    "then restart your editor or MCP host.",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            raise
 
         mcp.run()

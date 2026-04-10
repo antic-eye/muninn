@@ -112,3 +112,32 @@ def test_unknown_subcommand_exits_with_error(capsys):
     captured = capsys.readouterr()
     assert "Unknown command" in captured.err
     assert "badcommand" in captured.err
+
+
+def test_main_server_start_catches_chromadb_import_error(capsys, monkeypatch):
+    """main() exits 1 with a clear message when chromadb.api.rust is not importable.
+
+    This guards against a race condition where the venv is partially populated
+    (e.g. during a concurrent `uv sync`) and the Rust backend module is missing.
+    """
+    from muninn_mcp import cli as cli_module
+
+    def _broken_import(name, *args, **kwargs):
+        if name == "muninn_mcp.server":
+            raise ModuleNotFoundError("No module named 'chromadb.api.rust'")
+        return original_import(name, *args, **kwargs)
+
+    original_import = (
+        __builtins__["__import__"] if isinstance(__builtins__, dict) else __import__
+    )
+
+    monkeypatch.setattr("builtins.__import__", _broken_import)
+
+    with patch.object(sys, "argv", ["muninn-remembers"]):
+        with pytest.raises(SystemExit) as exc_info:
+            cli_module.main()
+
+    assert exc_info.value.code == 1
+    captured = capsys.readouterr()
+    assert "chromadb" in captured.err.lower()
+    assert "uv sync" in captured.err
