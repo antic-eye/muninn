@@ -3,7 +3,6 @@ Smoke tests for the MCP tool handler functions.
 These test the business logic of each tool without spinning up the MCP server.
 """
 
-import uuid
 import pytest
 
 
