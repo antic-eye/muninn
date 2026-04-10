@@ -22,17 +22,17 @@ class MemoryNotFoundError(KeyError):
     """Raised when a memory entry ID is not found in the collection."""
 
 
-_client: chromadb.PersistentClient | None = None
+_CLIENT: chromadb.PersistentClient | None = None
 
 
 def get_client() -> chromadb.PersistentClient:
     """Return (or create) the persistent ChromaDB client."""
-    global _client
-    if _client is None:
+    global _CLIENT  # pylint: disable=global-statement
+    if _CLIENT is None:
         chroma_path = DATA_DIR / "chroma"
         chroma_path.mkdir(parents=True, exist_ok=True)
-        _client = chromadb.PersistentClient(path=str(chroma_path))
-    return _client
+        _CLIENT = chromadb.PersistentClient(path=str(chroma_path))
+    return _CLIENT
 
 
 def get_collection(client: chromadb.ClientAPI, name: str) -> Collection:
