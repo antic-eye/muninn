@@ -526,6 +526,7 @@ def _git_info() -> tuple[str, str]:
             subprocess.check_output(
                 ["git", "rev-parse", "--abbrev-ref", "HEAD"],
                 stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL,
             )
             .decode()
             .strip()
@@ -534,6 +535,7 @@ def _git_info() -> tuple[str, str]:
             subprocess.check_output(
                 ["git", "rev-parse", "--short", "HEAD"],
                 stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL,
             )
             .decode()
             .strip()

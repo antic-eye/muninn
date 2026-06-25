@@ -19,8 +19,14 @@ class TestDetectProjectName:
         monkeypatch.delenv("MUNINN_PROJECT", raising=False)
         with patch(
             "subprocess.check_output", return_value=b"/home/user/projects/my-repo\n"
-        ):
+        ) as mock_co:
             assert detect_project_name() == "my-repo"
+            mock_co.assert_called_once()
+            kwargs = mock_co.call_args.kwargs
+            assert kwargs.get("stdin") == subprocess.DEVNULL, (
+                "detect_project_name must pass stdin=subprocess.DEVNULL to avoid "
+                "Windows pipe-handle inheritance deadlocks"
+            )
 
     def test_falls_back_to_cwd_basename(self, monkeypatch, tmp_path):
         monkeypatch.delenv("MUNINN_PROJECT", raising=False)
