@@ -27,6 +27,7 @@ def detect_project_name() -> str:
         raw = subprocess.check_output(
             ["git", "rev-parse", "--show-toplevel"],
             stderr=subprocess.DEVNULL,
+            stdin=subprocess.DEVNULL,
         )
         return Path(raw.decode().strip()).name
     except (subprocess.CalledProcessError, FileNotFoundError):
