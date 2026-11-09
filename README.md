@@ -26,7 +26,8 @@ Memory is stored locally in `~/.config/opencode/muninn/chroma/` using ChromaDB (
 ## Prerequisites
 
 1. **uv** — [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/)
-2. **Ollama** with `mxbai-embed-large` — can be local or remote:
+2. **Python 3.10–3.14** — `uvx` selects a compatible interpreter automatically. Python 3.15 is not supported yet because ChromaDB's `onnxruntime` dependency has no cp315 wheels.
+3. **Ollama** with `mxbai-embed-large` — can be local or remote:
    - **Local:** `ollama pull mxbai-embed-large && ollama serve`
    - **Remote:** any Ollama-compatible endpoint (e.g. Mimir) — set `MUNINN_OLLAMA_URL` and optionally `MUNINN_OLLAMA_TOKEN`
 

@@ -1,11 +1,19 @@
 [project]
 name = "muninn-remembers"
-version = "0.1.7"
+version = "0.1.8"
 description = "Semantic memory layer for OpenCode AI coding sessions"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.10"
-dependencies = ["mcp[cli]", "chromadb", "httpx"]
+# ChromaDB 1.x depends on onnxruntime, which has no wheels for Python 3.15 yet.
+# The upper bound makes uv select a compatible interpreter instead of letting the
+# resolver silently fall back to chromadb 0.3.x (which is incompatible with pydantic 2).
+# Revisit once onnxruntime publishes cp315 wheels.
+requires-python = ">=3.10,<3.15"
+dependencies = [
+    "mcp[cli]>=1,<2",
+    "chromadb>=1.5,<2",
+    "httpx",
+]
 
 [project.scripts]
 muninn-remembers = "muninn_mcp.cli:main"
