@@ -1,6 +1,6 @@
 [project]
 name = "muninn-remembers"
-version = "0.1.8"
+version = "0.1.9"
 description = "Semantic memory layer for OpenCode AI coding sessions"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -8,7 +8,9 @@ license = { file = "LICENSE" }
 # The upper bound makes uv select a compatible interpreter instead of letting the
 # resolver silently fall back to chromadb 0.3.x (which is incompatible with pydantic 2).
 # Revisit once onnxruntime publishes cp315 wheels.
-requires-python = ">=3.10,<3.15"
+# Lower bound is 3.11: Python 3.10 reached EOL on 2026-10-01, and filelock>=4.2.1
+# (the patched release for its advisories) requires 3.11+.
+requires-python = ">=3.11,<3.15"
 dependencies = [
     "mcp[cli]>=1,<2",
     "chromadb>=1.5,<2",
